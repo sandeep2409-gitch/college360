@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, BookOpen, MessageSquare, AlertCircle, Calendar, Shield, ArrowRight, Layout, CheckCircle, UserPlus } from 'lucide-react';
+import { Camera, BookOpen, MessageSquare, AlertCircle, Calendar, Shield, ArrowRight, Layout, CheckCircle, UserPlus, Clock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -49,6 +49,14 @@ const Landing = () => {
       protected: true
     },
     {
+      title: 'Time Table',
+      desc: 'View your weekly academic schedule and classroom locations.',
+      icon: Clock,
+      path: '/timetable',
+      color: '#f59e0b',
+      protected: true
+    },
+    {
       title: 'Add Students',
       desc: 'Onboard new students to the university database.',
       icon: UserPlus,
@@ -81,11 +89,11 @@ const Landing = () => {
   };
 
   return (
-    <div className="landing-page" style={{ paddingBottom: '100px' }}>
+    <div className="landing-page" style={{ paddingBottom: '100px', maxWidth: '1400px', margin: '0 auto', padding: '0 5%' }}>
       {/* Hero Section */}
       <header style={{ 
         textAlign: 'center', 
-        padding: '80px 0 100px',
+        padding: '120px 0 100px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'
@@ -134,11 +142,82 @@ const Landing = () => {
           This campus management system provides a unified, AI-powered interface for all university services.
         </p>
 
+        {user?.role === 'admin' && (
+          <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
+            <Link to="/manage-students" style={{ textDecoration: 'none' }}>
+              <button 
+                className="btn-primary" 
+                style={{ 
+                  padding: '16px 40px', 
+                  fontSize: '1rem', 
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+                  boxShadow: '0 8px 30px rgba(236, 72, 153, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}
+              >
+                <UserPlus size={20} /> Manage Students
+              </button>
+            </Link>
+            <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+              <button 
+                style={{ 
+                  padding: '16px 40px', 
+                  fontSize: '1rem', 
+                  borderRadius: '16px',
+                  background: 'transparent',
+                  border: '2px solid var(--border)',
+                  color: 'var(--text-main)',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}
+              >
+                <Shield size={20} /> Admin Panel
+              </button>
+            </Link>
+          </div>
+        )}
+
         {!user && (
-          <div style={{ display: 'flex', gap: '20px' }}>
-            <Link to="/register">
-              <button className="btn-primary" style={{ padding: '16px 32px', fontSize: '1rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                Create Free Account <ArrowRight size={18} />
+          <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
+            <Link to="/login" style={{ textDecoration: 'none' }}>
+              <button 
+                className="btn-primary" 
+                style={{ 
+                  padding: '16px 40px', 
+                  fontSize: '1rem', 
+                  borderRadius: '16px',
+                  boxShadow: '0 8px 30px rgba(99, 102, 241, 0.4)'
+                }}
+              >
+                Sign In
+              </button>
+            </Link>
+            <Link to="/register" style={{ textDecoration: 'none' }}>
+              <button 
+                style={{ 
+                  padding: '16px 40px', 
+                  fontSize: '1rem', 
+                  borderRadius: '16px',
+                  background: 'transparent',
+                  border: '2px solid var(--border)',
+                  color: 'var(--text-main)',
+                  fontWeight: '600'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.borderColor = 'var(--primary)';
+                  e.target.style.background = 'var(--bg-card)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.borderColor = 'var(--border)';
+                  e.target.style.background = 'transparent';
+                }}
+              >
+                Join Campus
               </button>
             </Link>
           </div>

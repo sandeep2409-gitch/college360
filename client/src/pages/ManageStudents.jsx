@@ -31,6 +31,8 @@ const ManageStudents = () => {
     fetchStudents();
   }, []);
 
+  const [successData, setSuccessData] = useState(null);
+
   const handleAddStudent = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -38,9 +40,8 @@ const ManageStudents = () => {
       const response = await axios.post('http://localhost:5001/api/admin/students', newStudent);
       if (response.status === 201) {
         setStudents([response.data, ...students]);
-        setShowAddModal(false);
+        setSuccessData({ ...newStudent });
         setNewStudent({ name: '', email: '', password: '', studentId: '' });
-        alert('Student added successfully!');
       }
     } catch (error) {
       console.error('Error adding student:', error);
@@ -154,96 +155,127 @@ const ManageStudents = () => {
 
       {showAddModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
-          <div className="glass-card animate-fade-in" style={{ width: '100%', maxWidth: '450px', padding: '30px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-              <h3 style={{ fontSize: '1.5rem' }}>Add New Student</h3>
-              <button onClick={() => setShowAddModal(false)} style={{ background: 'transparent', color: 'var(--text-dim)' }}><X size={24} /></button>
-            </div>
-            
-            <form onSubmit={handleAddStudent} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Full Name</label>
-                <div style={{ position: 'relative' }}>
-                  <User size={18} style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} />
-                  <input 
-                    type="text" 
-                    className="input-field" 
-                    placeholder="Enter full name" 
-                    style={{ paddingLeft: '45px' }}
-                    required
-                    value={newStudent.name}
-                    onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
-                  />
+          <div className="glass-card animate-fade-in" style={{ width: '100%', maxWidth: '450px', padding: '32px' }}>
+            {successData ? (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ background: 'var(--success)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+                  <Check size={32} color="white" />
                 </div>
-              </div>
-              
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Email Address</label>
-                <div style={{ position: 'relative' }}>
-                  <Mail size={18} style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} />
-                  <input 
-                    type="email" 
-                    className="input-field" 
-                    placeholder="student@college.edu" 
-                    style={{ paddingLeft: '45px' }}
-                    required
-                    value={newStudent.email}
-                    onChange={(e) => setNewStudent({...newStudent, email: e.target.value})}
-                  />
+                <h3 style={{ marginBottom: '10px' }}>Student Provisioned</h3>
+                <p style={{ color: 'var(--text-dim)', marginBottom: '25px', fontSize: '0.9rem' }}>The account is live. Share these credentials with {successData.name}:</p>
+                
+                <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', textAlign: 'left', marginBottom: '30px' }}>
+                  <div style={{ marginBottom: '12px' }}>
+                    <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '800' }}>Login Identifier</p>
+                    <p style={{ fontWeight: '600' }}>{successData.studentId} <span style={{ color: 'var(--text-dim)', fontWeight: '400' }}>or</span> {successData.email}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '800' }}>Access Password</p>
+                    <p style={{ fontWeight: '600' }}>{successData.password}</p>
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Student ID</label>
-                <div style={{ position: 'relative' }}>
-                  <Shield size={18} style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} />
-                  <input 
-                    type="text" 
-                    className="input-field" 
-                    placeholder="e.g. CS-2024-001" 
-                    style={{ paddingLeft: '45px' }}
-                    required
-                    value={newStudent.studentId}
-                    onChange={(e) => setNewStudent({...newStudent, studentId: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Default Password</label>
-                <div style={{ position: 'relative' }}>
-                  <Shield size={18} style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} />
-                  <input 
-                    type="password" 
-                    className="input-field" 
-                    placeholder="Assign a password" 
-                    style={{ paddingLeft: '45px' }}
-                    required
-                    value={newStudent.password}
-                    onChange={(e) => setNewStudent({...newStudent, password: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-                <button 
-                  type="button" 
-                  onClick={() => setShowAddModal(false)}
-                  style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', fontWeight: '600' }}
-                >
-                  Cancel
-                </button>
                 <button 
                   className="btn-primary" 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                  style={{ width: '100%' }}
+                  onClick={() => { setShowAddModal(false); setSuccessData(null); }}
                 >
-                  {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <Check size={18} />}
-                  {isSubmitting ? 'Adding...' : 'Confirm Add'}
+                  Return to Registry
                 </button>
               </div>
-            </form>
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+                  <h3 style={{ fontSize: '1.5rem' }}>Add New Student</h3>
+                  <button onClick={() => setShowAddModal(false)} style={{ background: 'transparent', color: 'var(--text-dim)' }}><X size={24} /></button>
+                </div>
+                
+                <form onSubmit={handleAddStudent} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Full Name</label>
+                    <div style={{ position: 'relative' }}>
+                      <User size={18} style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} />
+                      <input 
+                        type="text" 
+                        className="input-field" 
+                        placeholder="Enter full name" 
+                        style={{ paddingLeft: '45px' }}
+                        required
+                        value={newStudent.name}
+                        onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Email Address</label>
+                    <div style={{ position: 'relative' }}>
+                      <Mail size={18} style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} />
+                      <input 
+                        type="email" 
+                        className="input-field" 
+                        placeholder="student@college.edu" 
+                        style={{ paddingLeft: '45px' }}
+                        required
+                        value={newStudent.email}
+                        onChange={(e) => setNewStudent({...newStudent, email: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Student ID</label>
+                    <div style={{ position: 'relative' }}>
+                      <Shield size={18} style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} />
+                      <input 
+                        type="text" 
+                        className="input-field" 
+                        placeholder="e.g. CS-2024-001" 
+                        style={{ paddingLeft: '45px' }}
+                        required
+                        value={newStudent.studentId}
+                        onChange={(e) => setNewStudent({...newStudent, studentId: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Default Password</label>
+                    <div style={{ position: 'relative' }}>
+                      <Shield size={18} style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} />
+                      <input 
+                        type="password" 
+                        className="input-field" 
+                        placeholder="Assign a password" 
+                        style={{ paddingLeft: '45px' }}
+                        required
+                        value={newStudent.password}
+                        onChange={(e) => setNewStudent({...newStudent, password: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowAddModal(false)}
+                      style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', fontWeight: '600' }}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      className="btn-primary" 
+                      type="submit" 
+                      disabled={isSubmitting}
+                      style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                    >
+                      {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <Check size={18} />}
+                      {isSubmitting ? 'Adding...' : 'Confirm Add'}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}

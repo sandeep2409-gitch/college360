@@ -182,7 +182,7 @@ const Resources = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <button style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'white', padding: '0 20px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <button style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-main)', padding: '0 20px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Filter size={20} /> Filter
         </button>
       </div>
@@ -218,7 +218,7 @@ const Resources = () => {
                 )}
                 <button 
                   onClick={() => handleDownload(res.fileUrl)}
-                  style={{ background: 'rgba(255,255,255,0.05)', color: 'white', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)' }}
+                  style={{ background: 'var(--card-inner)', color: 'var(--text-main)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)' }}
                 >
                   <Download size={20} />
                 </button>

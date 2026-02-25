@@ -44,6 +44,16 @@ const Complaints = () => {
     }
   };
 
+  const handleResolve = async (id) => {
+    try {
+      await axios.put(`http://localhost:5001/api/admin/complaints/${id}/resolve`);
+      fetchComplaints(); // Refresh the list
+    } catch (error) {
+      console.error('Error resolving complaint:', error);
+      alert('Failed to update complaint status.');
+    }
+  };
+
   useEffect(() => {
     fetchComplaints();
   }, [isAdmin]);
@@ -111,6 +121,7 @@ const Complaints = () => {
                     <th style={{ padding: '15px', color: 'var(--text-dim)', fontWeight: '500' }}>ID</th>
                     <th style={{ padding: '15px', color: 'var(--text-dim)', fontWeight: '500' }}>Subject</th>
                     <th style={{ padding: '15px', color: 'var(--text-dim)', fontWeight: '500' }}>Status</th>
+                    <th style={{ padding: '15px', color: 'var(--text-dim)', fontWeight: '500' }}>Management</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -122,6 +133,17 @@ const Complaints = () => {
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '4px' }}>{complaint.description}</div>
                       </td>
                       <td style={{ padding: '15px' }}><StatusBadge status={complaint.status} /></td>
+                      <td style={{ padding: '15px' }}>
+                        {complaint.status !== 'resolved' && (
+                          <button 
+                            onClick={() => handleResolve(complaint.id)}
+                            className="btn-primary"
+                            style={{ padding: '6px 12px', fontSize: '0.7rem', background: 'var(--success)', border: 'none' }}
+                          >
+                            <CheckCircle2 size={14} /> Completed
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

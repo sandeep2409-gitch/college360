@@ -1,20 +1,50 @@
-import React, { useState } from 'react';
-import { Star, MessageSquare, User, Send, CheckCircle, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Star, MessageSquare, User, Send, CheckCircle, Loader2, Award } from 'lucide-react';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const faculty = [
-  { id: 1, name: 'AI HOD', subject: 'Artificial Intelligence & Data Science', rating: 4.8 },
-  { id: 2, name: 'ECE HOD', subject: 'Electronics & Communication Engineering', rating: 4.9 },
-  { id: 3, name: 'CSE HOD', subject: 'Computer Science & Engineering', rating: 4.7 },
-  { id: 4, name: 'MECH HOD', subject: 'Mechanical Engineering', rating: 4.6 },
+  { id: 1, name: 'Probability and Statistics', subject: 'Core Mathematics'},
+  { id: 2, name: 'Machine Learning', subject: 'Artificial Intelligence'},
+  { id: 3, name: 'DBMS', subject: 'Database Systems'},
+  { id: 4, name: 'Optimization Techniques', subject: 'Computational Logic'},
+  { id: 5, name: 'DLCO', subject: 'Digital Logic & Computer Org'},
+  { id: 6, name: 'AI and ML Lab', subject: 'Practical Laboratory'},
+  { id: 7, name: 'DBMS Lab', subject: 'Practical Laboratory'},
+  { id: 8, name: 'FSD Lab', subject: 'Full Stack Development Lab'},
 ];
 
 const Feedback = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  
+  // Admin State
+  const [feedbackList, setFeedbackList] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAdminFeedback();
+    }
+  }, [isAdmin]);
+
+  const fetchAdminFeedback = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('http://localhost:5001/api/admin/feedback');
+      setFeedbackList(response.data);
+    } catch (error) {
+      console.error('Error fetching admin feedback:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!selectedFaculty || rating === 0) {
@@ -42,6 +72,63 @@ const Feedback = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (isAdmin) {
+    return (
+      <div className="feedback-page animate-slide-up">
+        <header className="page-header">
+          <div>
+            <span className="text-muted" style={{ fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase' }}>Faculty Quality Audit</span>
+            <h1 className="page-title">Student Submissions</h1>
+          </div>
+          <div className="glass-card" style={{ padding: '12px 24px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Award size={20} color="var(--warning)" />
+            <span style={{ fontWeight: '700' }}>Overall Rating: 4.75</span>
+          </div>
+        </header>
+
+        <div className="glass-card">
+          <h3 style={{ marginBottom: '25px' }}>Student Feedback Records</h3>
+          {loading ? (
+            <div style={{ padding: '50px', textAlign: 'center' }}><Loader2 className="animate-spin" /></div>
+          ) : feedbackList.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
+              {feedbackList.map(item => (
+                <div key={item.id} style={{ 
+                  padding: '20px', 
+                  background: 'var(--bg-card)', 
+                  borderRadius: '16px', 
+                  border: '1px solid var(--border-light)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h4 style={{ fontSize: '1rem' }}>{item.facultyName}</h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase' }}>Submission</span>
+                    </div>
+                  </div>  
+                  <p style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.5', fontStyle: 'italic' }}>
+                    "{item.comment || 'No comment provided.'}"
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)' }} />
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Anonymous Submission</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '100px 0' }}>
+              <MessageSquare size={48} style={{ opacity: 0.1, marginBottom: '20px' }} />
+              <p style={{ color: 'var(--text-muted)' }}>No feedback submissions recorded yet.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (
@@ -71,17 +158,14 @@ const Feedback = () => {
                 style={{ 
                   padding: '15px', 
                   borderRadius: '12px', 
-                  background: selectedFaculty?.id === f.id ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255,255,255,0.03)',
+                  background: selectedFaculty?.id === f.id ? 'rgba(99, 102, 241, 0.1)' : 'var(--card-inner)',
                   border: `1px solid ${selectedFaculty?.id === f.id ? 'var(--primary)' : 'var(--border)'}`,
                   cursor: 'pointer',
                   transition: 'all 0.2s'
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                  <h4 style={{ color: selectedFaculty?.id === f.id ? 'var(--primary)' : 'white' }}>{f.name}</h4>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#fbbf24' }}>
-                    <Star size={14} fill="#fbbf24" /> <span>{f.rating}</span>
-                  </div>
+                  <h4 style={{ color: selectedFaculty?.id === f.id ? 'var(--primary)' : 'var(--text-main)' }}>{f.name}</h4>
                 </div>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>{f.subject}</p>
               </div>
@@ -97,23 +181,7 @@ const Feedback = () => {
                 Providing feedback for <strong>{selectedFaculty.name}</strong>.
               </p>
               
-              <div style={{ marginBottom: '25px' }}>
-                <p style={{ marginBottom: '10px', fontSize: '0.9rem' }}>Rating</p>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <Star 
-                      key={star} 
-                      size={28} 
-                      onClick={() => setRating(star)}
-                      style={{ 
-                        cursor: 'pointer',
-                        color: star <= rating ? '#fbbf24' : 'var(--text-dim)',
-                        fill: star <= rating ? '#fbbf24' : 'none'
-                      }} 
-                    />
-                  ))}
-                </div>
-              </div>
+              {/* Rating selection removed as per request */}
 
               <div style={{ marginBottom: '25px' }}>
                 <p style={{ marginBottom: '10px', fontSize: '0.9rem' }}>Additional Comments</p>

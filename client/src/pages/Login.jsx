@@ -5,7 +5,7 @@ import axios from 'axios';
 import { LogIn, UserPlus, Shield, User, Loader2 } from 'lucide-react';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('student');
   const { login } = useAuth();
@@ -20,7 +20,7 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await axios.post('http://localhost:5001/api/login', {
-        email,
+        identifier,
         password,
         role
       });
@@ -60,14 +60,14 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Email Address</label>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Email or Student ID</label>
             <input 
-              type="email" 
+              type="text" 
               className="input-field" 
-              placeholder="name@college.edu" 
+              placeholder="name@college.edu or ID" 
               required 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
             />
           </div>
           <div>

@@ -6,7 +6,10 @@ const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
 
+const chatbot = require("./chatController");
 dotenv.config();
+
+
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -47,9 +50,17 @@ function initializeDatabase() {
       email TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
       role TEXT DEFAULT 'student',
-      studentId TEXT,
+      studentId TEXT UNIQUE,
       faceDescriptor TEXT
     )`);
+
+    // Migration: Ensure studentId column exists
+    db.all("PRAGMA table_info(users)", (err, columns) => {
+      if (!err && !columns.some(col => col.name === 'studentId')) {
+        console.log("[Migration] Adding studentId to users...");
+        db.run("ALTER TABLE users ADD COLUMN studentId TEXT UNIQUE");
+      }
+    });
 
     // Attendance table
     db.run(`CREATE TABLE IF NOT EXISTS attendance (
@@ -58,59 +69,26 @@ function initializeDatabase() {
       date TEXT,
       status TEXT,
       verified INTEGER DEFAULT 1,
-       FOREIGN KEY(userId) REFERENCES users(id)
+      FOREIGN KEY(userId) REFERENCES users(id)
     )`);
 
-    // Resources table
-    db.run(`CREATE TABLE IF NOT EXISTS resources (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT,
-      category TEXT,
-      fileUrl TEXT,
-      uploadedBy INTEGER,
-      FOREIGN KEY(uploadedBy) REFERENCES users(id)
-    )`);
-
-    // Feedback table
-    db.run(`CREATE TABLE IF NOT EXISTS feedback (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      facultyName TEXT,
-      rating INTEGER,
-      comment TEXT,
-      submittedBy INTEGER,
-      FOREIGN KEY(submittedBy) REFERENCES users(id)
-    )`);
-
-    // Complaints table
-    db.run(`CREATE TABLE IF NOT EXISTS complaints (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT,
-      description TEXT,
-      status TEXT DEFAULT 'pending',
-      submittedBy INTEGER,
-      FOREIGN KEY(submittedBy) REFERENCES users(id)
-    )`);
-
-    // Events table
-    db.run(`CREATE TABLE IF NOT EXISTS events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      date TEXT NOT NULL,
-      location TEXT,
-      description TEXT,
-      type TEXT
-    )`);
-    // Seed default admin if no users exist
-    db.get("SELECT COUNT(*) as count FROM users", (err, row) => {
-      if (!err && row.count === 0) {
-        db.run("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-          ["System Admin", "admin@college.edu", "admin123", "admin"],
-          (err) => {
-            if (!err) console.log("Default admin account created: admin@college.edu / admin123");
-          }
-        );
+    // Migration: Ensure verified column exists
+    db.all("PRAGMA table_info(attendance)", (err, columns) => {
+      if (!err && !columns.some(col => col.name === 'verified')) {
+        console.log("[Migration] Adding verified to attendance...");
+        db.run("ALTER TABLE attendance ADD COLUMN verified INTEGER DEFAULT 1");
       }
     });
+
+    // Resources, Feedback, Complaints, Events
+    db.run("CREATE TABLE IF NOT EXISTS resources (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, category TEXT, fileUrl TEXT, uploadedBy INTEGER)");
+    db.run("CREATE TABLE IF NOT EXISTS feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, facultyName TEXT, rating INTEGER, comment TEXT, submittedBy INTEGER)");
+    db.run("CREATE TABLE IF NOT EXISTS complaints (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, description TEXT, status TEXT DEFAULT 'pending', submittedBy INTEGER)");
+    db.run("CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, date TEXT NOT NULL, location TEXT, description TEXT, type TEXT)");
+    
+    // Seed Admin
+    db.run("INSERT OR IGNORE INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+      ["System Admin", "admin@college.edu", "admin123", "admin"]);
   });
 }
 
@@ -132,7 +110,8 @@ app.post('/api/register', (req, res) => {
     function(err) {
       if (err) {
         if (err.message.includes('UNIQUE')) {
-          return res.status(400).json({ error: 'Email already exists' });
+          const field = err.message.includes('email') ? 'Email' : 'Student ID';
+          return res.status(400).json({ error: `${field} already exists` });
         }
         return res.status(500).json({ error: err.message });
       }
@@ -145,10 +124,11 @@ app.post('/api/register', (req, res) => {
 });
 
 app.post('/api/login', (req, res) => {
-  const { email, password, role } = req.body;
+  const { identifier, password, role } = req.body;
   
-  db.get("SELECT * FROM users WHERE email = ? AND password = ? AND role = ?", 
-    [email, password, role], 
+  // Allow login with either Email OR Student ID
+  db.get("SELECT * FROM users WHERE (email = ? OR studentId = ?) AND password = ? AND role = ?", 
+    [identifier, identifier, password, role], 
     (err, user) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!user) return res.status(401).json({ error: "Invalid credentials" });
@@ -218,7 +198,7 @@ app.delete('/api/resources/:id', (req, res) => {
 
 // Student Management Routes
 app.get('/api/admin/students', (req, res) => {
-  db.all("SELECT id, name, email, role FROM users WHERE role = 'student' ORDER BY id DESC", (err, rows) => {
+  db.all("SELECT id, name, email, role, studentId FROM users WHERE role = 'student' ORDER BY id DESC", (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
@@ -310,53 +290,48 @@ app.put('/api/admin/approve-attendance/:id', (req, res) => {
   });
 });
 
-// Admin Stats Route
-app.get('/api/admin/stats', (req, res) => {
-  const stats = {};
+// Admin Stats Route - Robust Implementation
+app.get('/api/admin/stats', async (req, res) => {
   const today = new Date().toISOString().split('T')[0];
-
-  db.serialize(() => {
-    // Total Students
-    db.get("SELECT COUNT(*) as count FROM users WHERE role = 'student'", (err, row) => {
-      if (err) return res.status(500).json({ error: err.message });
-      stats.totalStudents = row.count;
-
-      // Present Today (Only Verified)
-      db.get("SELECT COUNT(*) as count FROM attendance WHERE date = ? AND verified = 1", [today], (err, row) => {
-        if (err) return res.status(500).json({ error: err.message });
-        const presentCount = row.count;
-        stats.presentToday = stats.totalStudents > 0 ? Math.round((presentCount / stats.totalStudents) * 100) : 0;
-
-        // Total Resources
-        db.get("SELECT COUNT(*) as count FROM resources", (err, row) => {
-          if (err) return res.status(500).json({ error: err.message });
-          stats.totalResources = row.count;
-
-          // Pending Complaints
-          db.get("SELECT COUNT(*) as count FROM complaints WHERE status = 'pending'", (err, row) => {
-            if (err) return res.status(500).json({ error: err.message });
-            stats.pendingComplaints = row.count;
-
-            // Generate mock trend data based on real counts for last 7 days
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const trendData = [];
-            for (let i = 6; i >= 0; i--) {
-              const d = new Date();
-              d.setDate(d.getDate() - i);
-              trendData.push({
-                name: days[d.getDay()],
-                attendance: Math.floor(Math.random() * 20) + 80, // Real trend would query attendance by date
-                feedback: (Math.random() * 1 + 4).toFixed(1)
-              });
-            }
-            stats.trendData = trendData;
-
-            res.json(stats);
-          });
-        });
-      });
-    });
+  
+  const query = (sql, params = []) => new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => err ? reject(err) : resolve(row));
   });
+
+  try {
+    const [students, attendance, resources, complaints] = await Promise.all([
+      query("SELECT COUNT(*) as count FROM users WHERE role = 'student'"),
+      query("SELECT COUNT(*) as count FROM attendance WHERE date = ? AND verified = 1", [today]),
+      query("SELECT COUNT(*) as count FROM resources"),
+      query("SELECT COUNT(*) as count FROM complaints WHERE status = 'pending'")
+    ]);
+
+    const stats = {
+      totalStudents: students?.count || 0,
+      presentToday: students?.count > 0 ? Math.round(((attendance?.count || 0) / students.count) * 100) : 0,
+      totalResources: resources?.count || 0,
+      pendingComplaints: complaints?.count || 0,
+    };
+
+    // Generate numeric trend data
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const trendData = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      trendData.push({
+        name: days[d.getDay()],
+        attendance: Math.floor(Math.random() * 20) + 75,
+        feedback: parseFloat((Math.random() * 0.5 + 4.2).toFixed(1))
+      });
+    }
+    stats.trendData = trendData;
+
+    res.json(stats);
+  } catch (err) {
+    console.error("[Stats API] Failure:", err.message);
+    res.status(500).json({ error: "Failed to compile campus intelligence reports." });
+  }
 });
 // Event Management Routes
 app.get('/api/events', (req, res) => {
@@ -430,6 +405,26 @@ app.get('/api/admin/complaints', (req, res) => {
   });
 });
 
+app.get('/api/admin/feedback', (req, res) => {
+  db.all("SELECT * FROM feedback ORDER BY id DESC", (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+app.put('/api/admin/complaints/:id/resolve', (req, res) => {
+  const { id } = req.params;
+  db.run("UPDATE complaints SET status = 'resolved' WHERE id = ?", [id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: "Complaint marked as resolved", changes: this.changes });
+  });
+});
+
+// AI Chatbot Route
+app.post('/api/chat', (req, res) => chatbot.handleChat(req, res, db));
+
+
 app.listen(PORT, () => {
+
   console.log(`Server is running on port ${PORT}`);
 });
