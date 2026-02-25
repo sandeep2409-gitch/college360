@@ -11,8 +11,8 @@ const StatusBadge = ({ status }) => {
   };
   const { color, bg, icon: Icon } = styles[status] || styles.pending;
   return (
-    <span style={{ 
-      color, background: bg, padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', 
+    <span style={{
+      color, background: bg, padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem',
       textTransform: 'uppercase', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px'
     }}>
       <Icon size={12} /> {status}
@@ -23,7 +23,7 @@ const StatusBadge = ({ status }) => {
 const Complaints = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
-  
+
   const [showForm, setShowForm] = useState(!isAdmin);
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -47,7 +47,7 @@ const Complaints = () => {
   const handleResolve = async (id) => {
     try {
       await axios.put(`http://localhost:5001/api/admin/complaints/${id}/resolve`);
-      fetchComplaints(); // Refresh the list
+      fetchComplaints();
     } catch (error) {
       console.error('Error resolving complaint:', error);
       alert('Failed to update complaint status.');
@@ -98,8 +98,8 @@ const Complaints = () => {
           </p>
         </div>
         {isAdmin && (
-          <button 
-            className="btn-primary" 
+          <button
+            className="btn-primary"
             onClick={() => setShowForm(!showForm)}
             style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
           >
@@ -135,7 +135,7 @@ const Complaints = () => {
                       <td style={{ padding: '15px' }}><StatusBadge status={complaint.status} /></td>
                       <td style={{ padding: '15px' }}>
                         {complaint.status !== 'resolved' && (
-                          <button 
+                          <button
                             onClick={() => handleResolve(complaint.id)}
                             className="btn-primary"
                             style={{ padding: '6px 12px', fontSize: '0.7rem', background: 'var(--success)', border: 'none' }}
@@ -161,9 +161,9 @@ const Complaints = () => {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-dim)' }}>Nature of Complaint</label>
-              <select 
-                className="input-field" 
-                value={formData.category} 
+              <select
+                className="input-field"
+                value={formData.category}
                 onChange={(e) => setFormData({...formData, category: e.target.value})}
               >
                 <option>Infrastructure</option>
@@ -174,10 +174,10 @@ const Complaints = () => {
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-dim)' }}>Subject Line</label>
-              <input 
-                type="text" 
-                className="input-field" 
-                placeholder="Brief summary of the issue" 
+              <input
+                type="text"
+                className="input-field"
+                placeholder="Brief summary of the issue"
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
@@ -185,19 +185,19 @@ const Complaints = () => {
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-dim)' }}>Detailed Description</label>
-              <textarea 
-                className="input-field" 
-                rows="6" 
-                placeholder="Provide all relevant details. Remember, you remain anonymous." 
+              <textarea
+                className="input-field"
+                rows="6"
+                placeholder="Provide all relevant details. Remember, you remain anonymous."
                 required
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
               ></textarea>
             </div>
             <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-              <button 
+              <button
                 type="submit"
-                className="btn-primary" 
+                className="btn-primary"
                 disabled={isSubmitting}
                 style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
               >

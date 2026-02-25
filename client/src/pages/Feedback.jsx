@@ -23,8 +23,8 @@ const Feedback = () => {
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  
-  // Admin State
+
+
   const [feedbackList, setFeedbackList] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -94,10 +94,10 @@ const Feedback = () => {
           ) : feedbackList.length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
               {feedbackList.map(item => (
-                <div key={item.id} style={{ 
-                  padding: '20px', 
-                  background: 'var(--bg-card)', 
-                  borderRadius: '16px', 
+                <div key={item.id} style={{
+                  padding: '20px',
+                  background: 'var(--bg-card)',
+                  borderRadius: '16px',
                   border: '1px solid var(--border-light)',
                   display: 'flex',
                   flexDirection: 'column',
@@ -108,7 +108,7 @@ const Feedback = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase' }}>Submission</span>
                     </div>
-                  </div>  
+                  </div>
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.5', fontStyle: 'italic' }}>
                     "{item.comment || 'No comment provided.'}"
                   </p>
@@ -146,18 +146,18 @@ const Feedback = () => {
     <div className="feedback-page">
       <h1 style={{ marginBottom: '10px' }}>Faculty Feedback</h1>
       <p style={{ color: 'var(--text-dim)', marginBottom: '30px' }}>Your identity is not recorded. All submissions are 100% anonymous.</p>
-      
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
         <div className="glass-card">
           <h3 style={{ marginBottom: '20px' }}>Select Faculty</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {faculty.map(f => (
-              <div 
-                key={f.id} 
+              <div
+                key={f.id}
                 onClick={() => setSelectedFaculty(f)}
-                style={{ 
-                  padding: '15px', 
-                  borderRadius: '12px', 
+                style={{
+                  padding: '15px',
+                  borderRadius: '12px',
                   background: selectedFaculty?.id === f.id ? 'rgba(99, 102, 241, 0.1)' : 'var(--card-inner)',
                   border: `1px solid ${selectedFaculty?.id === f.id ? 'var(--primary)' : 'var(--border)'}`,
                   cursor: 'pointer',
@@ -180,22 +180,22 @@ const Feedback = () => {
               <p style={{ marginBottom: '20px', color: 'var(--text-dim)', fontSize: '0.9rem' }}>
                 Providing feedback for <strong>{selectedFaculty.name}</strong>.
               </p>
-              
-              {/* Rating selection removed as per request */}
+
+              {}
 
               <div style={{ marginBottom: '25px' }}>
                 <p style={{ marginBottom: '10px', fontSize: '0.9rem' }}>Additional Comments</p>
-                <textarea 
-                  className="input-field" 
-                  rows="4" 
+                <textarea
+                  className="input-field"
+                  rows="4"
                   placeholder="Share your experience anonymously..."
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                 ></textarea>
               </div>
 
-              <button 
-                className="btn-primary" 
+              <button
+                className="btn-primary"
                 disabled={isSubmitting}
                 style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
                 onClick={handleSubmit}

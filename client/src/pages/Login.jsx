@@ -42,14 +42,14 @@ const Login = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '30px' }}>
-          <button 
+          <button
             className={`btn-role ${role === 'student' ? 'active' : ''}`}
             onClick={() => setRole('student')}
             style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '8px', background: role === 'student' ? 'var(--primary)' : 'var(--card-inner)', border: '1px solid var(--border)', color: role === 'student' ? 'white' : 'var(--text-main)' }}
           >
             <User size={18} /> Student
           </button>
-          <button 
+          <button
             className={`btn-role ${role === 'admin' ? 'active' : ''}`}
             onClick={() => setRole('admin')}
             style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '8px', background: role === 'admin' ? 'var(--primary)' : 'var(--card-inner)', border: '1px solid var(--border)', color: role === 'admin' ? 'white' : 'var(--text-main)' }}
@@ -61,22 +61,22 @@ const Login = () => {
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Email or Student ID</label>
-            <input 
-              type="text" 
-              className="input-field" 
-              placeholder="name@college.edu or ID" 
-              required 
+            <input
+              type="text"
+              className="input-field"
+              placeholder="name@college.edu or ID"
+              required
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
             />
           </div>
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Password</label>
-            <input 
-              type="password" 
-              className="input-field" 
-              placeholder="••••••••" 
-              required 
+            <input
+              type="password"
+              className="input-field"
+              placeholder="••••••••"
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />

@@ -21,7 +21,7 @@ const Resources = () => {
     try {
       setLoading(true);
       const response = await axios.get('http://localhost:5001/api/resources');
-      // For backend resources, we might need to simulate type/size if not stored
+
       const data = response.data.map(r => ({
         ...r,
         type: r.fileUrl ? r.fileUrl.split('.').pop().toUpperCase() : 'PDF',
@@ -59,7 +59,7 @@ const Resources = () => {
           'Content-Type': 'multipart/form-data'
         }
       });
-      
+
       if (response.status === 201) {
         const resourceToAdd = {
           id: response.data.id,
@@ -110,8 +110,8 @@ const Resources = () => {
     <div className="resources-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <h1>Resource Sharing</h1>
-        <button 
-          className="btn-primary" 
+        <button
+          className="btn-primary"
           onClick={() => setShowUploadModal(true)}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
@@ -129,10 +129,10 @@ const Resources = () => {
             <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Title</label>
-                <input 
-                  type="text" 
-                  className="input-field" 
-                  required 
+                <input
+                  type="text"
+                  className="input-field"
+                  required
                   value={newResource.title}
                   onChange={(e) => setNewResource({...newResource, title: e.target.value})}
                   placeholder="e.g. Advanced Calculus Notes"
@@ -140,7 +140,7 @@ const Resources = () => {
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Category</label>
-                <select 
+                <select
                   className="input-field"
                   value={newResource.category}
                   onChange={(e) => setNewResource({...newResource, category: e.target.value})}
@@ -154,9 +154,9 @@ const Resources = () => {
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Select File</label>
-                <input 
-                  type="file" 
-                  className="input-field" 
+                <input
+                  type="file"
+                  className="input-field"
                   onChange={(e) => setSelectedFile(e.target.files[0])}
                   style={{ padding: '8px' }}
                 />
@@ -173,10 +173,10 @@ const Resources = () => {
       <div style={{ display: 'flex', gap: '20px', marginBottom: '40px' }}>
         <div style={{ position: 'relative', flex: 1 }}>
           <Search style={{ position: 'absolute', left: '15px', top: '14px', color: 'var(--text-dim)' }} size={20} />
-          <input 
-            type="text" 
-            placeholder="Search resources by title, subject, or tag..." 
-            className="input-field" 
+          <input
+            type="text"
+            placeholder="Search resources by title, subject, or tag..."
+            className="input-field"
             style={{ paddingLeft: '45px' }}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -208,7 +208,7 @@ const Resources = () => {
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
                 {user?.role === 'admin' && (
-                  <button 
+                  <button
                     onClick={() => handleDelete(res.id)}
                     style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}
                     title="Delete Resource"
@@ -216,7 +216,7 @@ const Resources = () => {
                     <Trash2 size={20} />
                   </button>
                 )}
-                <button 
+                <button
                   onClick={() => handleDownload(res.fileUrl)}
                   style={{ background: 'var(--card-inner)', color: 'var(--text-main)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)' }}
                 >

@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 const Dashboard = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
-  
+
   const [stats, setStats] = useState({
     totalStudents: 0,
     presentToday: 0,
@@ -35,12 +35,12 @@ const Dashboard = () => {
       setError(null);
       if (isAdmin) {
         const response = await axios.get('http://localhost:5001/api/admin/stats');
-        // Merge with existing state to ensure all keys exist
+
         setStats(prev => ({ ...prev, ...response.data }));
       } else {
         const response = await axios.get(`http://localhost:5001/api/attendance/${user.id}`);
         const total = response.data.length;
-        
+
         setStudentStats({
           attendancePercentage: total > 0 ? 100 : 0,
           daysPresent: total,
@@ -64,15 +64,15 @@ const Dashboard = () => {
   }, [user?.id, isAdmin]);
 
   const StatCard = ({ icon: Icon, label, value, color }) => {
-    // Elegant way to handle CSS variables or Hex colors for background highlights
+
     const isVar = typeof color === 'string' && color.startsWith('var');
-    const dynamicBadgeColor = isVar ? `${color.replace(')', '-glow)')}` : `${color}20`; // Primary variable has a predefined -glow variant
+    const dynamicBadgeColor = isVar ? `${color.replace(')', '-glow)')}` : `${color}20`;
 
     return (
       <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '24px' }}>
-        <div style={{ 
-          background: isVar ? `rgba(99, 102, 241, 0.1)` : dynamicBadgeColor, // Fallback if glow not set
-          padding: '16px', 
+        <div style={{
+          background: isVar ? `rgba(99, 102, 241, 0.1)` : dynamicBadgeColor,
+          padding: '16px',
           borderRadius: '16px',
           display: 'flex',
           alignItems: 'center',
@@ -140,8 +140,8 @@ const Dashboard = () => {
               <StatCard icon={CheckCircle} label="Attendance" value={`${studentStats.daysPresent} Days`} color="var(--success)" />
               <StatCard icon={Star} label="Academic Standing" value="8.4 GPA" color="var(--warning)" />
             </div>
-            
-            <div className="glass-card" style={{ 
+
+            <div className="glass-card" style={{
               background: 'var(--bg-card)',
               border: '1px solid var(--border)',
               padding: '32px',
@@ -181,7 +181,7 @@ const Dashboard = () => {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px', boxShadow: 'var(--shadow-lg)' }}
                   />
                 </PieChart>
@@ -204,11 +204,11 @@ const Dashboard = () => {
                 { to: '/calendar', label: 'University Schedule', icon: Calendar, color: '#3b82f6' },
                 { to: '/feedback', label: 'Instructor Feedback', icon: MessageSquare, color: '#10b981' }
               ].map((link, idx) => (
-                <Link key={idx} to={link.to} style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '16px', 
-                  textDecoration: 'none', 
+                <Link key={idx} to={link.to} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  textDecoration: 'none',
                   color: 'var(--text-main)',
                   padding: '16px',
                   background: 'var(--card-inner)',
@@ -235,13 +235,13 @@ const Dashboard = () => {
             </header>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {Array.isArray(studentStats.recentHistory) && studentStats.recentHistory.map((log, i) => (
-                <div key={i} style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
-                  padding: '16px 20px', 
-                  background: 'var(--card-inner)', 
-                  borderRadius: '16px', 
+                <div key={i} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '16px 20px',
+                  background: 'var(--card-inner)',
+                  borderRadius: '16px',
                   fontSize: '0.9rem',
                   border: '1px solid var(--border)'
                 }}>
@@ -285,7 +285,7 @@ const Dashboard = () => {
           </Link>
         </div>
       </header>
-      
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '28px', marginBottom: '48px' }}>
         <StatCard icon={Users} label="Active Students" value={(stats?.totalStudents || 0).toLocaleString()} color="var(--primary)" />
         <StatCard icon={CheckCircle} label="Today's Presence" value={`${stats?.presentToday || 0}%`} color="var(--success)" />
@@ -314,7 +314,7 @@ const Dashboard = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: '600' }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: '600' }} />
-                <Tooltip 
+                <Tooltip
                   cursor={{ stroke: 'var(--primary)', strokeWidth: 1 }}
                   contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px', boxShadow: 'var(--shadow-lg)', padding: '12px 16px' }}
                 />
@@ -338,7 +338,7 @@ const Dashboard = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: '600' }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: '600' }} domain={[4, 5]} />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px', boxShadow: 'var(--shadow-lg)', padding: '12px 16px' }}
                 />
                 <Line type="monotone" dataKey="feedback" stroke="var(--success)" strokeWidth={5} dot={{ r: 6, fill: 'var(--success)', strokeWidth: 0 }} activeDot={{ r: 9, stroke: 'white', strokeWidth: 2 }} animationDuration={1500} />
@@ -364,13 +364,13 @@ const Dashboard = () => {
               </div>
               <h4 style={{ marginBottom: '10px', fontSize: '1.2rem', fontWeight: '700' }}>{module.title}</h4>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '28px', lineHeight: '1.6' }}>{module.desc}</p>
-              <Link to={module.to} style={{ 
-                color: module.color, 
-                textDecoration: 'none', 
-                fontWeight: '800', 
-                fontSize: '0.85rem', 
-                display: 'flex', 
-                alignItems: 'center', 
+              <Link to={module.to} style={{
+                color: module.color,
+                textDecoration: 'none',
+                fontWeight: '800',
+                fontSize: '0.85rem',
+                display: 'flex',
+                alignItems: 'center',
                 gap: '8px',
                 letterSpacing: '0.02em'
               }}>

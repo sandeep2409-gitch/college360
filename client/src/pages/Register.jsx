@@ -21,9 +21,9 @@ const Register = () => {
     setError('');
     setLoading(true);
     try {
-      await axios.post('http://localhost:5001/api/register', { 
-        ...formData, 
-        role 
+      await axios.post('http://localhost:5001/api/register', {
+        ...formData,
+        role
       });
       alert('Registration successful! Please login.');
       navigate('/login');
@@ -43,13 +43,13 @@ const Register = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '30px' }}>
-          <button 
+          <button
             onClick={() => setRole('student')}
             style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '8px', background: role === 'student' ? 'var(--primary)' : 'var(--card-inner)', border: '1px solid var(--border)', color: role === 'student' ? 'white' : 'var(--text-main)' }}
           >
             <User size={18} /> Student
           </button>
-          <button 
+          <button
             onClick={() => setRole('admin')}
             style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '8px', background: role === 'admin' ? 'var(--primary)' : 'var(--card-inner)', border: '1px solid var(--border)', color: role === 'admin' ? 'white' : 'var(--text-main)' }}
           >
@@ -67,12 +67,12 @@ const Register = () => {
           <div style={{ position: 'relative' }}>
             <User size={18} style={{ position: 'absolute', left: '15px', top: '42px', color: 'var(--text-dim)' }} />
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Full Name</label>
-            <input 
-              type="text" 
-              className="input-field" 
-              placeholder="John Doe" 
+            <input
+              type="text"
+              className="input-field"
+              placeholder="John Doe"
               style={{ paddingLeft: '45px' }}
-              required 
+              required
               onChange={(e) => setFormData({...formData, name: e.target.value})}
             />
           </div>
@@ -80,12 +80,12 @@ const Register = () => {
           <div style={{ position: 'relative' }}>
             <Mail size={18} style={{ position: 'absolute', left: '15px', top: '42px', color: 'var(--text-dim)' }} />
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Email Address</label>
-            <input 
-              type="email" 
-              className="input-field" 
-              placeholder="name@college.edu" 
+            <input
+              type="email"
+              className="input-field"
+              placeholder="name@college.edu"
               style={{ paddingLeft: '45px' }}
-              required 
+              required
               onChange={(e) => setFormData({...formData, email: e.target.value})}
             />
           </div>
@@ -94,12 +94,12 @@ const Register = () => {
             <div style={{ position: 'relative' }}>
               <UserCheck size={18} style={{ position: 'absolute', left: '15px', top: '42px', color: 'var(--text-dim)' }} />
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Student ID</label>
-              <input 
-                type="text" 
-                className="input-field" 
-                placeholder="CS-2024-001" 
+              <input
+                type="text"
+                className="input-field"
+                placeholder="CS-2024-001"
                 style={{ paddingLeft: '45px' }}
-                required 
+                required
                 onChange={(e) => setFormData({...formData, studentId: e.target.value})}
               />
             </div>
@@ -108,12 +108,12 @@ const Register = () => {
           <div style={{ position: 'relative' }}>
             <Lock size={18} style={{ position: 'absolute', left: '15px', top: '42px', color: 'var(--text-dim)' }} />
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Password</label>
-            <input 
-              type="password" 
-              className="input-field" 
-              placeholder="••••••••" 
+            <input
+              type="password"
+              className="input-field"
+              placeholder="••••••••"
               style={{ paddingLeft: '45px' }}
-              required 
+              required
               onChange={(e) => setFormData({...formData, password: e.target.value})}
             />
           </div>

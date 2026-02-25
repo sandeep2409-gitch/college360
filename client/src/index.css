@@ -1,5 +1,5 @@
 :root {
-  /* Ultra-Premium Design Tokens */
+  
   --primary: #6366f1;
   --primary-glow: rgba(99, 102, 241, 0.5);
   --bg-main: #0a0a0c;
@@ -32,7 +32,7 @@
   --shadow-lg:
     0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --card-blur: blur(0px); /* Default to none for dark performance, or blur(20px) for glass */
+  --card-blur: blur(0px); 
 }
 
 [data-theme="light"] {
@@ -71,7 +71,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Professional Scrollbar */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -101,7 +101,7 @@ h5 {
   line-height: 1.2;
 }
 
-/* Base Components */
+
 .glass-card {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -142,7 +142,7 @@ h5 {
   box-shadow: 0 6px 20px 0 var(--primary-glow);
 }
 
-/* App Layout */
+
 .app-layout {
   display: flex;
   min-height: 100vh;
@@ -160,7 +160,7 @@ h5 {
   margin-left: var(--sidebar-collapsed);
 }
 
-/* Sidebar Styling */
+
 .sidebar {
   width: var(--sidebar-width);
   height: 100vh;
@@ -217,7 +217,7 @@ h5 {
   box-shadow: 0 4px 14px 0 var(--primary-glow);
 }
 
-/* Modern Input */
+
 .input-field {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -236,7 +236,7 @@ h5 {
   box-shadow: 0 0 0 4px var(--primary-glow);
 }
 
-/* Animations */
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -252,7 +252,7 @@ h5 {
   animation: slideUp 0.4s ease-out forwards;
 }
 
-/* Page Headers */
+
 .page-header {
   margin-bottom: 40px;
   display: flex;

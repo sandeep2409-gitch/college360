@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 const EventCalendar = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
-  
+
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -126,8 +126,8 @@ const EventCalendar = () => {
           </p>
         </div>
         {isAdmin && (
-          <button 
-            className="btn-primary" 
+          <button
+            className="btn-primary"
             onClick={() => { resetForm(); setShowModal(true); }}
             style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
           >

@@ -90,17 +90,17 @@ const Landing = () => {
 
   return (
     <div className="landing-page" style={{ paddingBottom: '100px', maxWidth: '1400px', margin: '0 auto', padding: '0 5%' }}>
-      {/* Hero Section */}
-      <header style={{ 
-        textAlign: 'center', 
+      {}
+      <header style={{
+        textAlign: 'center',
         padding: '120px 0 100px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'
       }}>
-        <div className="badge animate-fade-in" style={{ 
-          background: 'rgba(99, 102, 241, 0.1)', 
-          color: 'var(--primary)', 
+        <div className="badge animate-fade-in" style={{
+          background: 'rgba(99, 102, 241, 0.1)',
+          color: 'var(--primary)',
           border: '1px solid rgba(99, 102, 241, 0.2)',
           padding: '8px 16px',
           borderRadius: '50px',
@@ -110,29 +110,29 @@ const Landing = () => {
         }}>
           ✨ Next-Gen Campus Operating System
         </div>
-        <h1 style={{ 
-          fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', 
+        <h1 style={{
+          fontSize: 'clamp(2.5rem, 8vw, 4.5rem)',
           lineHeight: 1.1,
-          marginBottom: '20px', 
+          marginBottom: '20px',
           maxWidth: '900px',
           fontWeight: '800',
           letterSpacing: '-0.02em'
         }}>
           Campus management system
         </h1>
-        <p style={{ 
-          fontSize: '1.25rem', 
-          color: 'var(--text-dim)', 
-          maxWidth: '750px', 
-          margin: '0 auto 50px', 
-          lineHeight: 1.6 
+        <p style={{
+          fontSize: '1.25rem',
+          color: 'var(--text-dim)',
+          maxWidth: '750px',
+          margin: '0 auto 50px',
+          lineHeight: 1.6
         }}>
-          <span style={{ 
+          <span style={{
             display: 'block',
             fontSize: '1.8rem',
             fontWeight: '700',
-            background: 'linear-gradient(to right, var(--primary), #8b5cf6)', 
-            WebkitBackgroundClip: 'text', 
+            background: 'linear-gradient(to right, var(--primary), #8b5cf6)',
+            WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
             marginBottom: '10px'
@@ -145,11 +145,11 @@ const Landing = () => {
         {user?.role === 'admin' && (
           <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
             <Link to="/manage-students" style={{ textDecoration: 'none' }}>
-              <button 
-                className="btn-primary" 
-                style={{ 
-                  padding: '16px 40px', 
-                  fontSize: '1rem', 
+              <button
+                className="btn-primary"
+                style={{
+                  padding: '16px 40px',
+                  fontSize: '1rem',
                   borderRadius: '16px',
                   background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
                   boxShadow: '0 8px 30px rgba(236, 72, 153, 0.4)',
@@ -162,10 +162,10 @@ const Landing = () => {
               </button>
             </Link>
             <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-              <button 
-                style={{ 
-                  padding: '16px 40px', 
-                  fontSize: '1rem', 
+              <button
+                style={{
+                  padding: '16px 40px',
+                  fontSize: '1rem',
                   borderRadius: '16px',
                   background: 'transparent',
                   border: '2px solid var(--border)',
@@ -185,11 +185,11 @@ const Landing = () => {
         {!user && (
           <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
             <Link to="/login" style={{ textDecoration: 'none' }}>
-              <button 
-                className="btn-primary" 
-                style={{ 
-                  padding: '16px 40px', 
-                  fontSize: '1rem', 
+              <button
+                className="btn-primary"
+                style={{
+                  padding: '16px 40px',
+                  fontSize: '1rem',
                   borderRadius: '16px',
                   boxShadow: '0 8px 30px rgba(99, 102, 241, 0.4)'
                 }}
@@ -198,10 +198,10 @@ const Landing = () => {
               </button>
             </Link>
             <Link to="/register" style={{ textDecoration: 'none' }}>
-              <button 
-                style={{ 
-                  padding: '16px 40px', 
-                  fontSize: '1rem', 
+              <button
+                style={{
+                  padding: '16px 40px',
+                  fontSize: '1rem',
                   borderRadius: '16px',
                   background: 'transparent',
                   border: '2px solid var(--border)',
@@ -224,13 +224,13 @@ const Landing = () => {
         )}
       </header>
 
-      {/* Modules Grid */}
+      {}
       <section>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '40px' 
+          marginBottom: '40px'
         }}>
           <div>
             <h2 style={{ fontSize: '2rem', marginBottom: '8px' }}>System Modules</h2>
@@ -243,17 +243,17 @@ const Landing = () => {
           )}
         </div>
 
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-          gap: '24px' 
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '24px'
         }}>
           {modules.map((mod, i) => (
-            <div 
-              key={i} 
-              className="glass-card module-card" 
+            <div
+              key={i}
+              className="glass-card module-card"
               onClick={() => handleModuleClick(mod.path, mod.protected, mod.adminOnly)}
-              style={{ 
+              style={{
                 padding: '32px',
                 cursor: 'pointer',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -262,14 +262,14 @@ const Landing = () => {
                 display: mod.adminOnly && user?.role !== 'admin' ? 'none' : 'block'
               }}
             >
-              <div style={{ 
-                background: `${mod.color}15`, 
-                width: '64px', 
-                height: '64px', 
-                borderRadius: '16px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
+              <div style={{
+                background: `${mod.color}15`,
+                width: '64px',
+                height: '64px',
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 marginBottom: '24px',
                 border: `1px solid ${mod.color}30`
               }}>
@@ -277,11 +277,11 @@ const Landing = () => {
               </div>
               <h3 style={{ fontSize: '1.4rem', marginBottom: '12px', fontWeight: '700' }}>{mod.title}</h3>
               <p style={{ color: 'var(--text-dim)', lineHeight: 1.6, fontSize: '0.95rem' }}>{mod.desc}</p>
-              
-              <div className="module-arrow" style={{ 
-                position: 'absolute', 
-                bottom: '32px', 
-                right: '32px', 
+
+              <div className="module-arrow" style={{
+                position: 'absolute',
+                bottom: '32px',
+                right: '32px',
                 color: mod.color,
                 opacity: 0,
                 transform: 'translateX(-10px)',

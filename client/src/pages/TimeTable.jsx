@@ -6,7 +6,7 @@ const TimeTable = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [isEditing, setIsEditing] = useState(false);
-  
+
   const periods = [
     { id: 1, label: 'Period 1', time: '09:15AM to 10:05AM' },
     { id: 2, label: 'Period 2', time: '10:05AM to 10:55AM' },
@@ -97,20 +97,20 @@ const TimeTable = () => {
           <span style={{ fontSize: '0.8rem', fontWeight: '800', color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Institutional Schedule</span>
           <h1 className="page-title" style={{ fontSize: '2rem' }}>Class Time Table</h1>
         </div>
-        
+
         <div style={{ display: 'flex', gap: '15px' }}>
           {isAdmin && (
-            <button 
+            <button
               onClick={() => isEditing ? saveTimetable() : setIsEditing(true)}
-              className="btn-primary" 
+              className="btn-primary"
               style={{ background: isEditing ? 'var(--success)' : 'var(--primary)', display: 'flex', alignItems: 'center', gap: '8px' }}
             >
               {isEditing ? <Check size={18} /> : <Edit2 size={18} />}
               {isEditing ? 'Save Changes' : 'Edit Schedule'}
             </button>
           )}
-          <button 
-            className="btn-primary" 
+          <button
+            className="btn-primary"
             onClick={() => window.print()}
             style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#334155' }}
           >
@@ -126,9 +126,9 @@ const TimeTable = () => {
         </div>
       )}
 
-      <div style={{ 
-        overflowX: 'auto', 
-        borderRadius: '16px', 
+      <div style={{
+        overflowX: 'auto',
+        borderRadius: '16px',
         border: '1px solid #e2e8f0',
         background: 'white',
         boxShadow: 'var(--shadow-lg)'
@@ -155,13 +155,13 @@ const TimeTable = () => {
                   <td key={idx} style={{ padding: '12px', border: '1px solid #e2e8f0', verticalAlign: 'top', minHeight: '120px', background: cell.subject ? 'transparent' : '#f8fafc' }}>
                     {isEditing ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <textarea 
+                        <textarea
                           value={cell.subject}
                           onChange={(e) => handleCellChange(day, idx, 'subject', e.target.value)}
                           placeholder="Subject"
                           style={{ width: '100%', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '4px', fontSize: '0.75rem', height: '40px' }}
                         />
-                        <textarea 
+                        <textarea
                           value={cell.teacher}
                           onChange={(e) => handleCellChange(day, idx, 'teacher', e.target.value)}
                           placeholder="Teacher"
@@ -174,11 +174,11 @@ const TimeTable = () => {
                           {cell.subject || '-'}
                         </div>
                         {cell.teacher && (
-                          <div style={{ 
-                            fontSize: '0.65rem', 
-                            color: '#64748b', 
-                            fontWeight: '700', 
-                            textTransform: 'uppercase', 
+                          <div style={{
+                            fontSize: '0.65rem',
+                            color: '#64748b',
+                            fontWeight: '700',
+                            textTransform: 'uppercase',
                             letterSpacing: '0.05em',
                             paddingTop: '8px',
                             borderTop: '1px solid #f1f5f9',

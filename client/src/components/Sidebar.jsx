@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Layout, 
-  Calendar, 
-  Camera, 
-  BookOpen, 
-  Star, 
-  AlertCircle, 
-  Users, 
-  LogOut, 
+import {
+  Layout,
+  Calendar,
+  Camera,
+  BookOpen,
+  Star,
+  AlertCircle,
+  Users,
+  LogOut,
   ChevronLeft,
   ChevronRight,
   Home,
@@ -43,10 +43,10 @@ const Sidebar = () => {
   return (
     <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
-        <div style={{ 
-          width: '40px', 
-          height: '40px', 
-          background: 'var(--primary)', 
+        <div style={{
+          width: '40px',
+          height: '40px',
+          background: 'var(--primary)',
           borderRadius: '12px',
           display: 'flex',
           alignItems: 'center',
@@ -65,9 +65,9 @@ const Sidebar = () => {
         {filteredNav.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <Link 
-              key={item.path} 
-              to={item.path} 
+            <Link
+              key={item.path}
+              to={item.path}
               className={`nav-item ${isActive ? 'active' : ''}`}
             >
               <item.icon size={20} style={{ minWidth: '20px' }} />
@@ -78,7 +78,7 @@ const Sidebar = () => {
       </nav>
 
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--border)' }}>
-        <button 
+        <button
           onClick={toggleTheme}
           className="nav-item"
           style={{ background: 'transparent', width: '100%', border: 'none', cursor: 'pointer' }}
@@ -88,7 +88,7 @@ const Sidebar = () => {
         </button>
 
         {user ? (
-          <button 
+          <button
             onClick={() => { logout(); navigate('/login'); }}
             className="nav-item"
             style={{ background: 'transparent', width: '100%', border: 'none', cursor: 'pointer', color: 'var(--danger)' }}
@@ -97,7 +97,7 @@ const Sidebar = () => {
             {!isCollapsed && <span>Logout</span>}
           </button>
         ) : (
-          <Link 
+          <Link
             to="/login"
             className="nav-item"
             style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', width: '100%' }}
@@ -107,7 +107,7 @@ const Sidebar = () => {
           </Link>
         )}
 
-        <button 
+        <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="nav-item"
           style={{ background: 'var(--bg-card)', marginTop: '8px', justifyContent: 'center' }}

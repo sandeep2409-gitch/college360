@@ -8,14 +8,14 @@ const Attendance = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const webcamRef = useRef(null);
-  
-  // Administrators see logs directly, students start at marking
+
+
   const [activeTab, setActiveTab] = useState(isAdmin ? 'history' : 'mark');
   const [isScanning, setIsScanning] = useState(false);
   const [result, setResult] = useState(null);
-  const [studentData, setStudentData] = useState({ 
-    name: user?.name || '', 
-    id: user?.studentId || '' 
+  const [studentData, setStudentData] = useState({
+    name: user?.name || '',
+    id: user?.studentId || ''
   });
   const [capturedImage, setCapturedImage] = useState(null);
   const [history, setHistory] = useState([]);
@@ -32,12 +32,12 @@ const Attendance = () => {
     }
   }, [user]);
 
-  // Mock Classroom Location (Center of campus/classroom)
-  const CLASSROOM_LOCATION = { lat: 16.838936472130737, lng: 82.22506175342866 }; 
-  const ALLOWED_RADIUS_METERS = 100; // Allowed within 100 meters
+
+  const CLASSROOM_LOCATION = { lat: 16.838936472130737, lng: 82.22506175342866 };
+  const ALLOWED_RADIUS_METERS = 100;
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3; // metres
+    const R = 6371e3;
     const φ1 = lat1 * Math.PI/180;
     const φ2 = lat2 * Math.PI/180;
     const Δφ = (lat2-lat1) * Math.PI/180;
@@ -48,7 +48,7 @@ const Attendance = () => {
               Math.sin(Δλ/2) * Math.sin(Δλ/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-    return R * c; // in metres
+    return R * c;
   };
 
   const verifyLocation = () => {
@@ -67,7 +67,7 @@ const Attendance = () => {
             CLASSROOM_LOCATION.lat,
             CLASSROOM_LOCATION.lng
           );
-          
+
           if (dist <= ALLOWED_RADIUS_METERS) {
             resolve(true);
           } else {
@@ -92,19 +92,19 @@ const Attendance = () => {
     try {
       setLocationError(null);
       await verifyLocation();
-      
+
       setIsScanning(true);
       setResult(null);
 
       const imageSrc = webcamRef.current.getScreenshot();
-      
+
       setTimeout(async () => {
         try {
           const response = await axios.post('http://localhost:5001/api/attendance', {
             studentId: studentData.id,
             status: 'present'
           });
-          
+
           setIsScanning(false);
           setCapturedImage(imageSrc);
           setResult({
@@ -150,17 +150,17 @@ const Attendance = () => {
             {isAdmin ? 'Access and export official campus audit logs' : 'Verify identity and mark your daily presence'}
           </p>
         </div>
-        
+
         <div style={{ display: 'flex', background: 'var(--card-inner)', padding: '4px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           {!isAdmin && (
-            <button 
+            <button
               onClick={() => setActiveTab('mark')}
               style={{ padding: '10px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', background: activeTab === 'mark' ? 'var(--primary)' : 'transparent', color: activeTab === 'mark' ? 'white' : 'var(--text-dim)', border: 'none', cursor: 'pointer' }}
             >
               Mark Presence
             </button>
           )}
-          <button 
+          <button
             onClick={() => setActiveTab('history')}
             style={{ padding: '10px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', background: activeTab === 'history' ? 'var(--primary)' : 'transparent', color: activeTab === 'history' ? 'white' : 'var(--text-dim)', border: 'none', cursor: 'pointer' }}
           >
@@ -194,10 +194,10 @@ const Attendance = () => {
                 )}
               </div>
 
-              <button 
-                className="btn-primary" 
-                onClick={startScan} 
-                disabled={isScanning || isVerifyingLocation} 
+              <button
+                className="btn-primary"
+                onClick={startScan}
+                disabled={isScanning || isVerifyingLocation}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', height: '50px', position: 'relative' }}
               >
                 {isVerifyingLocation ? (
@@ -210,7 +210,7 @@ const Attendance = () => {
                   </>
                 )}
               </button>
-              
+
               {locationError && (
                 <div style={{ marginTop: '15px', color: 'var(--error)', background: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid var(--error)' }}>
                   <XCircle size={18} /> {locationError}
@@ -247,10 +247,10 @@ const Attendance = () => {
                       {isAdmin && <td style={{ padding: '15px 25px' }}>{row.studentId}</td>}
                       <td style={{ padding: '15px 25px' }}>{row.date}</td>
                       <td style={{ padding: '15px 25px' }}>
-                        <span style={{ 
-                          background: 'rgba(16, 185, 129, 0.1)', 
-                          color: 'var(--success)', 
-                          padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold' 
+                        <span style={{
+                          background: 'rgba(16, 185, 129, 0.1)',
+                          color: 'var(--success)',
+                          padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold'
                         }}>
                           PRESENT
                         </span>

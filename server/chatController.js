@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-// Static FAQ Knowledge Base
+
 const STATIC_FAQS = [
   {
     keywords: ["study material", "notes", "syllabus", "resources", "books"],
@@ -35,12 +35,12 @@ const handleChat = async (req, res, db) => {
 
   console.log(`[Chat] Incoming query from ${userName} (${userRole}): "${message}"`);
 
-  // Helper for DB Queries in Chat
+
   const getSystemStats = () => {
     return new Promise((resolve) => {
       if (!db) return resolve({ studentCount: "N/A", resourceCount: "N/A", pendingComplaints: "N/A" });
       db.get(`
-        SELECT 
+        SELECT
           (SELECT COUNT(*) FROM users WHERE role = 'student') as studentCount,
           (SELECT COUNT(*) FROM resources) as resourceCount,
           (SELECT COUNT(*) FROM complaints WHERE status = 'pending') as pendingComplaints
@@ -51,17 +51,17 @@ const handleChat = async (req, res, db) => {
     });
   };
 
-  // 1. Initial Greetings
+
   if (lowerMessage.match(/\b(hi|hello|hey|hola)\b/)) {
-    return res.json({ 
+    return res.json({
       message: `Hello ${userName}! I'm the **College 360 Logic Core**. How can I help you navigate the system today?`
     });
   }
 
-  // 2. Real-time System Queries
+
   if (lowerMessage.includes("how many") || lowerMessage.includes("stats") || lowerMessage.includes("count") || lowerMessage.includes("status")) {
     const stats = await getSystemStats();
-    
+
     if (lowerMessage.includes("student")) {
       return res.json({ message: `There are currently **${stats.studentCount} students** registered in our digital campus registry.` });
     }
@@ -73,7 +73,7 @@ const handleChat = async (req, res, db) => {
     }
   }
 
-  // 3. Navigation Intent Detection
+
   const navMap = {
     "attendance": "/attendance",
     "resource": "/resources",
@@ -92,37 +92,37 @@ const handleChat = async (req, res, db) => {
   for (const [key, path] of Object.entries(navMap)) {
     if (lowerMessage.includes(key)) {
       if (key === "student" && userRole !== "admin") continue;
-      return res.json({ 
-        message: `I can help you with that. Visit the **${key.charAt(0).toUpperCase() + key.slice(1)}** module here: \n\nDirect Link: **${path}**` 
+      return res.json({
+        message: `I can help you with that. Visit the **${key.charAt(0).toUpperCase() + key.slice(1)}** module here: \n\nDirect Link: **${path}**`
       });
     }
   }
 
-  // 4. Check for Static Match
+
   for (const faq of STATIC_FAQS) {
     if (faq.keywords.some(keyword => lowerMessage.includes(keyword))) {
       return res.json({ message: faq.response });
     }
   }
 
-  // 5. Fallback to Gemini AI with Deep System Context
+
   const apiKey = process.env.GEMINI_API_KEY;
   if (apiKey && apiKey !== 'your_gemini_api_key_here' && !apiKey.startsWith('MOCK')) {
     try {
       const stats = await getSystemStats();
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ 
+      const model = genAI.getGenerativeModel({
         model: "gemini-1.5-flash",
         systemInstruction: `You are the "College 360 AI Assistant".
         Current User: ${userName} (${userRole}).
         System Stats: ${stats.studentCount} students, ${stats.resourceCount} resources, ${stats.pendingComplaints} complaints.
-        
+
         Guidelines:
         - Use real-time stats if asked.
         - Direct users to paths like /attendance, /resources, etc.
         - Tone: Sophisticated, technical, yet helpful.`
       });
-      
+
       const chat = model.startChat({
         history: (history || []).map(h => ({
           role: h.role === 'bot' ? 'model' : h.role,
@@ -138,9 +138,9 @@ const handleChat = async (req, res, db) => {
     }
   }
 
-  // 6. Final Fallback
-  res.json({ 
-    message: `I'm analyzing your request, ${userName}, but I couldn't find a direct campus link. Try asking about **Attendance**, **Resources**, or **Feedback**!` 
+
+  res.json({
+    message: `I'm analyzing your request, ${userName}, but I couldn't find a direct campus link. Try asking about **Attendance**, **Resources**, or **Feedback**!`
   });
 };
 

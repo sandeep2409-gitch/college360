@@ -62,8 +62,8 @@ const ManageStudents = () => {
     }
   };
 
-  const filteredStudents = students.filter(s => 
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredStudents = students.filter(s =>
+    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -74,8 +74,8 @@ const ManageStudents = () => {
           <h1 style={{ marginBottom: '5px' }}>Student Management</h1>
           <p style={{ color: 'var(--text-dim)' }}>Add, view, and manage university students</p>
         </div>
-        <button 
-          className="btn-primary" 
+        <button
+          className="btn-primary"
           onClick={() => setShowAddModal(true)}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
@@ -86,10 +86,10 @@ const ManageStudents = () => {
       <div className="glass-card" style={{ padding: '20px', marginBottom: '30px' }}>
         <div style={{ position: 'relative' }}>
           <Search style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} size={18} />
-          <input 
-            type="text" 
-            placeholder="Search students by name or email..." 
-            className="input-field" 
+          <input
+            type="text"
+            placeholder="Search students by name or email..."
+            className="input-field"
             style={{ paddingLeft: '45px' }}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -132,9 +132,9 @@ const ManageStudents = () => {
                     </span>
                   </td>
                   <td style={{ padding: '15px 25px', textAlign: 'right' }}>
-                    <button 
+                    <button
                       onClick={() => handleDeleteStudent(student.id)}
-                      style={{ color: 'var(--error)', background: 'transparent', padding: '8px', borderRadius: '8px', cursor: 'pointer' }} 
+                      style={{ color: 'var(--error)', background: 'transparent', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}
                       title="Delete Student"
                     >
                       <Trash2 size={18} />
@@ -163,7 +163,7 @@ const ManageStudents = () => {
                 </div>
                 <h3 style={{ marginBottom: '10px' }}>Student Provisioned</h3>
                 <p style={{ color: 'var(--text-dim)', marginBottom: '25px', fontSize: '0.9rem' }}>The account is live. Share these credentials with {successData.name}:</p>
-                
+
                 <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', textAlign: 'left', marginBottom: '30px' }}>
                   <div style={{ marginBottom: '12px' }}>
                     <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '800' }}>Login Identifier</p>
@@ -175,8 +175,8 @@ const ManageStudents = () => {
                   </div>
                 </div>
 
-                <button 
-                  className="btn-primary" 
+                <button
+                  className="btn-primary"
                   style={{ width: '100%' }}
                   onClick={() => { setShowAddModal(false); setSuccessData(null); }}
                 >
@@ -189,16 +189,16 @@ const ManageStudents = () => {
                   <h3 style={{ fontSize: '1.5rem' }}>Add New Student</h3>
                   <button onClick={() => setShowAddModal(false)} style={{ background: 'transparent', color: 'var(--text-dim)' }}><X size={24} /></button>
                 </div>
-                
+
                 <form onSubmit={handleAddStudent} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Full Name</label>
                     <div style={{ position: 'relative' }}>
                       <User size={18} style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} />
-                      <input 
-                        type="text" 
-                        className="input-field" 
-                        placeholder="Enter full name" 
+                      <input
+                        type="text"
+                        className="input-field"
+                        placeholder="Enter full name"
                         style={{ paddingLeft: '45px' }}
                         required
                         value={newStudent.name}
@@ -206,15 +206,15 @@ const ManageStudents = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Email Address</label>
                     <div style={{ position: 'relative' }}>
                       <Mail size={18} style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} />
-                      <input 
-                        type="email" 
-                        className="input-field" 
-                        placeholder="student@college.edu" 
+                      <input
+                        type="email"
+                        className="input-field"
+                        placeholder="student@college.edu"
                         style={{ paddingLeft: '45px' }}
                         required
                         value={newStudent.email}
@@ -227,10 +227,10 @@ const ManageStudents = () => {
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Student ID</label>
                     <div style={{ position: 'relative' }}>
                       <Shield size={18} style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} />
-                      <input 
-                        type="text" 
-                        className="input-field" 
-                        placeholder="e.g. CS-2024-001" 
+                      <input
+                        type="text"
+                        className="input-field"
+                        placeholder="e.g. CS-2024-001"
                         style={{ paddingLeft: '45px' }}
                         required
                         value={newStudent.studentId}
@@ -243,10 +243,10 @@ const ManageStudents = () => {
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Default Password</label>
                     <div style={{ position: 'relative' }}>
                       <Shield size={18} style={{ position: 'absolute', left: '15px', top: '12px', color: 'var(--text-dim)' }} />
-                      <input 
-                        type="password" 
-                        className="input-field" 
-                        placeholder="Assign a password" 
+                      <input
+                        type="password"
+                        className="input-field"
+                        placeholder="Assign a password"
                         style={{ paddingLeft: '45px' }}
                         required
                         value={newStudent.password}
@@ -256,16 +256,16 @@ const ManageStudents = () => {
                   </div>
 
                   <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => setShowAddModal(false)}
                       style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', fontWeight: '600' }}
                     >
                       Cancel
                     </button>
-                    <button 
-                      className="btn-primary" 
-                      type="submit" 
+                    <button
+                      className="btn-primary"
+                      type="submit"
                       disabled={isSubmitting}
                       style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
                     >

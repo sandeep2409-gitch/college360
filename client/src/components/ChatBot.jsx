@@ -8,10 +8,10 @@ const ChatBot = () => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { 
-      role: 'bot', 
-      text: user ? `Welcome back, ${user.name}! I'm your College 360 AI. How can I assist you in the ${user.role} portal today?` : "Hello! I'm your AI campus assistant. How can I help you navigate College 360 today?", 
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    {
+      role: 'bot',
+      text: user ? `Welcome back, ${user.name}! I'm your College 360 AI. How can I assist you in the ${user.role} portal today?` : "Hello! I'm your AI campus assistant. How can I help you navigate College 360 today?",
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
   const [input, setInput] = useState('');
@@ -30,12 +30,12 @@ const ChatBot = () => {
     const messageToSend = customInput || input;
     if (!messageToSend.trim() || isLoading) return;
 
-    const userMessage = { 
-      role: 'user', 
-      text: messageToSend, 
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    const userMessage = {
+      role: 'user',
+      text: messageToSend,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
@@ -52,19 +52,19 @@ const ChatBot = () => {
         userContext: user ? { name: user.name, role: user.role, id: user.id } : null
       });
 
-      const botMessage = { 
-        role: 'bot', 
-        text: response.data.message, 
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      const botMessage = {
+        role: 'bot',
+        text: response.data.message,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      
+
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error('Chat error:', error);
-      setMessages(prev => [...prev, { 
-        role: 'bot', 
-        text: 'Connection failed. Please ensure the backend is live.', 
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        text: 'Connection failed. Please ensure the backend is live.',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }]);
     } finally {
       setIsLoading(false);
@@ -72,7 +72,7 @@ const ChatBot = () => {
   };
 
   const renderText = (text) => {
-    // Advanced text renderer with support for links and emphasis
+
     const parts = text.split(/(\*\*.*?\*\*|\/api\/\w+|\/\w+)/);
     return parts.map((part, i) => {
       if (part.startsWith('**') && part.endsWith('**')) {
@@ -110,7 +110,7 @@ const ChatBot = () => {
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
             className="mb-6 w-[400px] sm:w-[450px] bg-black/80 backdrop-blur-3xl rounded-[32px] shadow-[0_32px_80px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden flex flex-col h-[650px]"
           >
-            {/* God-Tier Gradient Header */}
+            {}
             <div className="p-6 bg-gradient-to-br from-primary via-[#4f46e5] to-[#8b5cf6] relative">
               <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
                 <Sparkles size={120} />
@@ -128,7 +128,7 @@ const ChatBot = () => {
                     <p className="text-white/60 text-xs font-bold uppercase tracking-[0.2em]">{isLoading ? 'Synthesizing...' : 'Adaptive Intelligence'}</p>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsOpen(false)}
                   className="bg-black/20 hover:bg-black/40 p-2 rounded-xl transition-all border border-white/5"
                 >
@@ -137,13 +137,13 @@ const ChatBot = () => {
               </div>
             </div>
 
-            {/* Immersive Conversation Zone */}
+            {}
             <div className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth" id="chat-messages">
               {messages.map((msg, index) => (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, x: msg.role === 'user' ? 20 : -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  key={index} 
+                  key={index}
                   className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
                 >
                   <div className={`flex items-center gap-2 mb-2 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -156,8 +156,8 @@ const ChatBot = () => {
                   </div>
 
                   <div className={`relative px-5 py-4 rounded-[24px] text-sm leading-relaxed shadow-lg ${
-                    msg.role === 'user' 
-                      ? 'bg-primary text-white rounded-tr-none border border-white/10' 
+                    msg.role === 'user'
+                      ? 'bg-primary text-white rounded-tr-none border border-white/10'
                       : 'bg-white/5 text-white/90 rounded-tl-none border border-white/5 backdrop-blur-sm'
                   }`}>
                     {renderText(msg.text)}
@@ -167,7 +167,7 @@ const ChatBot = () => {
                   </div>
                 </motion.div>
               ))}
-              
+
               {isLoading && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-start">
                   <div className="bg-white/5 border border-white/5 px-6 py-4 rounded-[24px] rounded-tl-none flex gap-2">
@@ -180,10 +180,10 @@ const ChatBot = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Adaptive Input Console */}
+            {}
             <div className="p-6 bg-black/40 border-t border-white/10 backdrop-blur-3xl">
               {!input && messages.length <= 2 && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="grid grid-cols-3 gap-3 mb-6"
@@ -240,7 +240,7 @@ const ChatBot = () => {
         ) : (
           <div className="relative">
             <Bot size={36} strokeWidth={2.5} />
-            <motion.div 
+            <motion.div
               animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
               transition={{ repeat: Infinity, duration: 2 }}
               className="absolute -inset-2 bg-white rounded-full blur-md -z-1"

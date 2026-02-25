@@ -14,12 +14,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Middleware
+
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Multer Setup
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -30,7 +30,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Database Setup
+
 const dbPath = path.resolve(__dirname, "database.sqlite");
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
@@ -43,7 +43,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
 function initializeDatabase() {
   db.serialize(() => {
-    // Users table
+
     db.run(`CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
@@ -54,7 +54,7 @@ function initializeDatabase() {
       faceDescriptor TEXT
     )`);
 
-    // Migration: Ensure studentId column exists
+
     db.all("PRAGMA table_info(users)", (err, columns) => {
       if (!err && !columns.some(col => col.name === 'studentId')) {
         console.log("[Migration] Adding studentId to users...");
@@ -62,7 +62,7 @@ function initializeDatabase() {
       }
     });
 
-    // Attendance table
+
     db.run(`CREATE TABLE IF NOT EXISTS attendance (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       userId INTEGER,
@@ -72,7 +72,7 @@ function initializeDatabase() {
       FOREIGN KEY(userId) REFERENCES users(id)
     )`);
 
-    // Migration: Ensure verified column exists
+
     db.all("PRAGMA table_info(attendance)", (err, columns) => {
       if (!err && !columns.some(col => col.name === 'verified')) {
         console.log("[Migration] Adding verified to attendance...");
@@ -80,33 +80,33 @@ function initializeDatabase() {
       }
     });
 
-    // Resources, Feedback, Complaints, Events
+
     db.run("CREATE TABLE IF NOT EXISTS resources (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, category TEXT, fileUrl TEXT, uploadedBy INTEGER)");
     db.run("CREATE TABLE IF NOT EXISTS feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, facultyName TEXT, rating INTEGER, comment TEXT, submittedBy INTEGER)");
     db.run("CREATE TABLE IF NOT EXISTS complaints (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, description TEXT, status TEXT DEFAULT 'pending', submittedBy INTEGER)");
     db.run("CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, date TEXT NOT NULL, location TEXT, description TEXT, type TEXT)");
-    
-    // Seed Admin
+
+
     db.run("INSERT OR IGNORE INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
       ["System Admin", "admin@college.edu", "admin123", "admin"]);
   });
 }
 
-// Routes
+
 app.get("/", (req, res) => {
   res.send("College Management System API is running.");
 });
 
-// Auth Routes
+
 app.post('/api/register', (req, res) => {
   const { name, email, password, role, studentId } = req.body;
-  
+
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Name, email, and password are required' });
   }
 
-  db.run("INSERT INTO users (name, email, password, role, studentId) VALUES (?, ?, ?, ?, ?)", 
-    [name, email, password, role || 'student', studentId || null], 
+  db.run("INSERT INTO users (name, email, password, role, studentId) VALUES (?, ?, ?, ?, ?)",
+    [name, email, password, role || 'student', studentId || null],
     function(err) {
       if (err) {
         if (err.message.includes('UNIQUE')) {
@@ -115,9 +115,9 @@ app.post('/api/register', (req, res) => {
         }
         return res.status(500).json({ error: err.message });
       }
-      res.status(201).json({ 
-        message: 'User registered successfully', 
-        user: { id: this.lastID, name, email, role: role || 'student', studentId } 
+      res.status(201).json({
+        message: 'User registered successfully',
+        user: { id: this.lastID, name, email, role: role || 'student', studentId }
       });
     }
   );
@@ -125,29 +125,29 @@ app.post('/api/register', (req, res) => {
 
 app.post('/api/login', (req, res) => {
   const { identifier, password, role } = req.body;
-  
-  // Allow login with either Email OR Student ID
-  db.get("SELECT * FROM users WHERE (email = ? OR studentId = ?) AND password = ? AND role = ?", 
-    [identifier, identifier, password, role], 
+
+
+  db.get("SELECT * FROM users WHERE (email = ? OR studentId = ?) AND password = ? AND role = ?",
+    [identifier, identifier, password, role],
     (err, user) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
-      res.json({ 
-        token: 'mock-jwt-token', 
-        user: { 
-          id: user.id, 
-          name: user.name, 
-          email: user.email, 
+      res.json({
+        token: 'mock-jwt-token',
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
           role: user.role,
-          studentId: user.studentId 
-        } 
+          studentId: user.studentId
+        }
       });
     }
   );
 });
 
-// Resource Routes
+
 app.get('/api/resources', (req, res) => {
   db.all("SELECT * FROM resources", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -161,14 +161,14 @@ app.post('/api/resources/upload', upload.single('file'), (req, res) => {
   const fileSize = req.file ? (req.file.size / (1024 * 1024)).toFixed(2) + ' MB' : '0 MB';
   const fileType = req.file ? path.extname(req.file.originalname).substring(1).toUpperCase() : 'PDF';
 
-  db.run("INSERT INTO resources (title, category, fileUrl, uploadedBy) VALUES (?, ?, ?, ?)", 
-    [title, category, fileUrl, userId], 
+  db.run("INSERT INTO resources (title, category, fileUrl, uploadedBy) VALUES (?, ?, ?, ?)",
+    [title, category, fileUrl, userId],
     function(err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.status(201).json({ 
-        id: this.lastID, 
-        fileUrl, 
-        size: fileSize, 
+      res.status(201).json({
+        id: this.lastID,
+        fileUrl,
+        size: fileSize,
         type: fileType,
         date: new Date().toISOString().split('T')[0]
       });
@@ -176,10 +176,10 @@ app.post('/api/resources/upload', upload.single('file'), (req, res) => {
   );
 });
 
-// Student Management Routes
+
 app.delete('/api/resources/:id', (req, res) => {
   const { id } = req.params;
-  
+
   db.get("SELECT fileUrl FROM resources WHERE id = ?", [id], (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!row) return res.status(404).json({ error: "Resource not found" });
@@ -196,7 +196,7 @@ app.delete('/api/resources/:id', (req, res) => {
   });
 });
 
-// Student Management Routes
+
 app.get('/api/admin/students', (req, res) => {
   db.all("SELECT id, name, email, role, studentId FROM users WHERE role = 'student' ORDER BY id DESC", (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -207,13 +207,13 @@ app.get('/api/admin/students', (req, res) => {
 app.post('/api/admin/students', (req, res) => {
   const { name, email, password, studentId } = req.body;
   const role = 'student';
-  
+
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Name, email, and password are required' });
   }
 
-  db.run("INSERT INTO users (name, email, password, role, studentId) VALUES (?, ?, ?, ?, ?)", 
-    [name, email, password, role, studentId], 
+  db.run("INSERT INTO users (name, email, password, role, studentId) VALUES (?, ?, ?, ?, ?)",
+    [name, email, password, role, studentId],
     function(err) {
       if (err) {
         if (err.message.includes('UNIQUE')) {
@@ -234,7 +234,7 @@ app.delete('/api/admin/students/:id', (req, res) => {
   });
 });
 
-// Attendance Routes
+
 app.post('/api/attendance', (req, res) => {
   const { studentId, status } = req.body;
   const date = new Date().toISOString().split('T')[0];
@@ -247,11 +247,11 @@ app.post('/api/attendance', (req, res) => {
       [user.id, date, status || 'present'],
       function(err) {
         if (err) return res.status(500).json({ error: err.message });
-        res.status(201).json({ 
-          id: this.lastID, 
-          userId: user.id, 
+        res.status(201).json({
+          id: this.lastID,
+          userId: user.id,
           name: user.name,
-          date, 
+          date,
           status: status || 'present',
           verified: 1,
           message: "Attendance recorded successfully."
@@ -271,10 +271,10 @@ app.get('/api/attendance/:userId', (req, res) => {
 
 app.get('/api/admin/pending-attendance', (req, res) => {
   db.all(`
-    SELECT a.*, u.name, u.studentId 
-    FROM attendance a 
-    JOIN users u ON a.userId = u.id 
-    WHERE a.verified = 0 
+    SELECT a.*, u.name, u.studentId
+    FROM attendance a
+    JOIN users u ON a.userId = u.id
+    WHERE a.verified = 0
     ORDER BY a.date DESC
   `, (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -290,10 +290,10 @@ app.put('/api/admin/approve-attendance/:id', (req, res) => {
   });
 });
 
-// Admin Stats Route - Robust Implementation
+
 app.get('/api/admin/stats', async (req, res) => {
   const today = new Date().toISOString().split('T')[0];
-  
+
   const query = (sql, params = []) => new Promise((resolve, reject) => {
     db.get(sql, params, (err, row) => err ? reject(err) : resolve(row));
   });
@@ -313,7 +313,7 @@ app.get('/api/admin/stats', async (req, res) => {
       pendingComplaints: complaints?.count || 0,
     };
 
-    // Generate numeric trend data
+
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const trendData = [];
     for (let i = 6; i >= 0; i--) {
@@ -333,7 +333,7 @@ app.get('/api/admin/stats', async (req, res) => {
     res.status(500).json({ error: "Failed to compile campus intelligence reports." });
   }
 });
-// Event Management Routes
+
 app.get('/api/events', (req, res) => {
   db.all("SELECT * FROM events ORDER BY date ASC", (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -344,7 +344,7 @@ app.get('/api/events', (req, res) => {
 app.post('/api/events', (req, res) => {
   const { title, date, location, description, type } = req.body;
   if (!title || !date) return res.status(400).json({ error: "Title and Date are required" });
-  
+
   db.run("INSERT INTO events (title, date, location, description, type) VALUES (?, ?, ?, ?, ?)",
     [title, date, location, description, type],
     function(err) {
@@ -357,7 +357,7 @@ app.post('/api/events', (req, res) => {
 app.put('/api/events/:id', (req, res) => {
   const { title, date, location, description, type } = req.body;
   const { id } = req.params;
-  
+
   db.run("UPDATE events SET title = ?, date = ?, location = ?, description = ?, type = ? WHERE id = ?",
     [title, date, location, description, type, id],
     function(err) {
@@ -375,7 +375,7 @@ app.delete('/api/events/:id', (req, res) => {
   });
 });
 
-// Feedback & Complaints (Anonymous)
+
 app.post('/api/feedback', (req, res) => {
   const { facultyName, rating, comment } = req.body;
   db.run("INSERT INTO feedback (facultyName, rating, comment) VALUES (?, ?, ?)",
@@ -420,7 +420,7 @@ app.put('/api/admin/complaints/:id/resolve', (req, res) => {
   });
 });
 
-// AI Chatbot Route
+
 app.post('/api/chat', (req, res) => chatbot.handleChat(req, res, db));
 
 

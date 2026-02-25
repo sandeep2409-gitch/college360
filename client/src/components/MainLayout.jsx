@@ -7,7 +7,7 @@ const MainLayout = ({ children }) => {
   const { user } = useAuth();
   const location = useLocation();
 
-  // Don't show sidebar on Login or Register pages
+
   const noSidebarPages = ['/login', '/register'];
   const showSidebar = !noSidebarPages.includes(location.pathname);
 
