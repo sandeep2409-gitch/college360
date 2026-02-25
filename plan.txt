@@ -1,0 +1,13 @@
+problem statement: AI powered centralized college management system that :
+--student attendance using face recoginition system
+--enables notes and acadamic resource sharing 
+--allows faculty rating and feedback
+--provides structured college complaint and grievance portal 
+--ofers realtime analytics dshboards for admin 
+modules in this system:
+1.attendance module
+2.resource sharing module
+3.faculty rating and feedback module
+4.complaint and grievance module
+5.analytics dashboard module
+
