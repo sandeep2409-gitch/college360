@@ -15,7 +15,8 @@ import {
   Sun,
   Moon,
   Clock,
-  User
+  User,
+  QrCode
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -33,7 +34,7 @@ const Sidebar = () => {
     { path: '/manage-students', icon: Users, label: 'Students', adminOnly: true },
     { path: '/calendar', icon: Calendar, label: 'Events' },
     { path: '/timetable', icon: Clock, label: 'Time Table' },
-    { path: '/attendance', icon: Camera, label: 'Attendance' },
+    { path: '/attendance', icon: QrCode, label: 'Attendance' },
     { path: '/resources', icon: BookOpen, label: 'Resources' },
     { path: '/feedback', icon: Star, label: 'Faculty' },
     { path: '/complaints', icon: AlertCircle, label: 'Complaints' },

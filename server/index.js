@@ -129,20 +129,30 @@ function initializeDatabase() {
     // Run Migrations for missing columns if any (Safety check)
     db.all("PRAGMA table_info(resources)", (err, columns) => {
       if (!err && !columns.some((col) => col.name === "status")) {
-        db.run("ALTER TABLE resources ADD COLUMN status TEXT DEFAULT 'pending'");
+        db.run(
+          "ALTER TABLE resources ADD COLUMN status TEXT DEFAULT 'pending'",
+        );
       }
     });
 
     db.all("PRAGMA table_info(timetable)", (err, columns) => {
-      if (!err && columns.length > 0 && !columns.some((col) => col.pk === 1 && col.name === 'className')) {
+      if (
+        !err &&
+        columns.length > 0 &&
+        !columns.some((col) => col.pk === 1 && col.name === "className")
+      ) {
         // If the table exists but does not have className as PRIMARY KEY, let's fix it by recreating.
         // It's a small table, so dropping and recreating is okay in this context.
         db.serialize(() => {
           db.run("DROP TABLE IF EXISTS timetable_old");
           db.run("ALTER TABLE timetable RENAME TO timetable_old");
-          db.run("CREATE TABLE timetable (className TEXT PRIMARY KEY, data TEXT)");
+          db.run(
+            "CREATE TABLE timetable (className TEXT PRIMARY KEY, data TEXT)",
+          );
           // Try to migrate data if possible
-          db.run("INSERT OR IGNORE INTO timetable (className, data) SELECT className, data FROM timetable_old WHERE className IS NOT NULL");
+          db.run(
+            "INSERT OR IGNORE INTO timetable (className, data) SELECT className, data FROM timetable_old WHERE className IS NOT NULL",
+          );
           db.run("DROP TABLE timetable_old");
         });
       }
@@ -242,10 +252,14 @@ app.post("/api/login", (req, res) => {
 
 // Resources
 app.get("/api/resources", (req, res) => {
-  db.all("SELECT * FROM resources WHERE status = 'approved'", [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
+  db.all(
+    "SELECT * FROM resources WHERE status = 'approved'",
+    [],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    },
+  );
 });
 
 app.post(
@@ -311,41 +325,60 @@ app.delete("/api/resources/:id", authenticateToken, (req, res) => {
 });
 
 // Admin Resource Approval
-app.get("/api/admin/resources/pending", authenticateToken, isAdmin, (req, res) => {
-  db.all(
-    "SELECT r.*, u.name as uploaderName FROM resources r JOIN users u ON r.uploadedBy = u.id WHERE r.status = 'pending'",
-    [],
-    (err, rows) => {
+app.get(
+  "/api/admin/resources/pending",
+  authenticateToken,
+  isAdmin,
+  (req, res) => {
+    db.all(
+      "SELECT r.*, u.name as uploaderName FROM resources r JOIN users u ON r.uploadedBy = u.id WHERE r.status = 'pending'",
+      [],
+      (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+      },
+    );
+  },
+);
+
+app.put(
+  "/api/admin/resources/:id/approve",
+  authenticateToken,
+  isAdmin,
+  (req, res) => {
+    const { id } = req.params;
+    db.run(
+      "UPDATE resources SET status = 'approved' WHERE id = ?",
+      [id],
+      function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Resource approved", changes: this.changes });
+      },
+    );
+  },
+);
+
+app.put(
+  "/api/admin/resources/:id/reject",
+  authenticateToken,
+  isAdmin,
+  (req, res) => {
+    const { id } = req.params;
+    db.get("SELECT fileUrl FROM resources WHERE id = ?", [id], (err, row) => {
       if (err) return res.status(500).json({ error: err.message });
-      res.json(rows);
-    },
-  );
-});
+      if (!row) return res.status(404).json({ error: "Resource not found" });
 
-app.put("/api/admin/resources/:id/approve", authenticateToken, isAdmin, (req, res) => {
-  const { id } = req.params;
-  db.run("UPDATE resources SET status = 'approved' WHERE id = ?", [id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: "Resource approved", changes: this.changes });
-  });
-});
+      const filename = path.basename(row.fileUrl);
+      const filePath = path.join(__dirname, "uploads", filename);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
-app.put("/api/admin/resources/:id/reject", authenticateToken, isAdmin, (req, res) => {
-  const { id } = req.params;
-  db.get("SELECT fileUrl FROM resources WHERE id = ?", [id], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(404).json({ error: "Resource not found" });
-
-    const filename = path.basename(row.fileUrl);
-    const filePath = path.join(__dirname, "uploads", filename);
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-
-    db.run("DELETE FROM resources WHERE id = ?", [id], function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ message: "Resource rejected and deleted" });
+      db.run("DELETE FROM resources WHERE id = ?", [id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Resource rejected and deleted" });
+      });
     });
-  });
-});
+  },
+);
 
 // Admin - Student Management
 app.get("/api/admin/students", authenticateToken, isAdmin, (req, res) => {
@@ -417,9 +450,46 @@ app.delete(
 );
 
 // Attendance
-app.post("/api/attendance", (req, res) => {
-  const { studentId, status } = req.body;
+app.get(
+  "/api/admin/generate-qr-session",
+  authenticateToken,
+  isAdmin,
+  (req, res) => {
+    const sessionId = Math.random().toString(36).substring(7);
+    const token = jwt.sign(
+      {
+        sessionId,
+        type: "attendance_session",
+        iat: Math.floor(Date.now() / 1000),
+      },
+      JWT_SECRET,
+      { expiresIn: "5m" }, // QR code valid for 5 minutes
+    );
+    res.json({ token, sessionId });
+  },
+);
+
+app.post("/api/attendance", authenticateToken, (req, res) => {
+  const { studentId, status, qrToken } = req.body;
   const date = new Date().toISOString().split("T")[0];
+
+  // Validate QR Token if provided (for enhanced security)
+  if (!qrToken) {
+    return res
+      .status(400)
+      .json({ error: "QR code verification required for security." });
+  }
+
+  try {
+    const decoded = jwt.verify(qrToken, JWT_SECRET);
+    if (decoded.type !== "attendance_session") {
+      return res.status(400).json({ error: "Invalid QR code type." });
+    }
+  } catch (err) {
+    return res
+      .status(400)
+      .json({ error: "QR code expired or invalid. Please scan a fresh QR." });
+  }
 
   db.get(
     "SELECT id, name FROM users WHERE studentId = ?",
@@ -428,20 +498,34 @@ app.post("/api/attendance", (req, res) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!user) return res.status(404).json({ error: "Student ID not found" });
 
-      db.run(
-        "INSERT INTO attendance (userId, date, status, verified) VALUES (?, ?, ?, 1)",
-        [user.id, date, status || "present"],
-        function (err) {
-          if (err) return res.status(500).json({ error: err.message });
-          res.status(201).json({
-            id: this.lastID,
-            userId: user.id,
-            name: user.name,
-            date,
-            status: status || "present",
-            verified: 1,
-            message: "Attendance recorded successfully.",
-          });
+      // Check if already marked for today
+      db.get(
+        "SELECT id FROM attendance WHERE userId = ? AND date = ?",
+        [user.id, date],
+        (err, existing) => {
+          if (existing) {
+            return res
+              .status(400)
+              .json({ error: "Attendance already marked for today." });
+          }
+
+          db.run(
+            "INSERT INTO attendance (userId, date, status, verified) VALUES (?, ?, ?, 1)",
+            [user.id, date, status || "present"],
+            function (err) {
+              if (err) return res.status(500).json({ error: err.message });
+              res.status(201).json({
+                id: this.lastID,
+                userId: user.id,
+                name: user.name,
+                date,
+                status: status || "present",
+                verified: 1,
+                message:
+                  "Attendance recorded successfully with multi-factor verification.",
+              });
+            },
+          );
         },
       );
     },
@@ -495,18 +579,23 @@ app.get("/api/admin/stats", authenticateToken, isAdmin, async (req, res) => {
     });
 
   try {
-    const [students, attendance, resources, pendingResources, complaints] = await Promise.all([
-      query("SELECT COUNT(*) as count FROM users WHERE role = 'student'"),
-      query(
-        "SELECT COUNT(*) as count FROM attendance WHERE date = ? AND verified = 1",
-        [today],
-      ),
-      query("SELECT COUNT(*) as count FROM resources WHERE status = 'approved'"),
-      query("SELECT COUNT(*) as count FROM resources WHERE status = 'pending'"),
-      query(
-        "SELECT COUNT(*) as count FROM complaints WHERE status = 'pending'",
-      ),
-    ]);
+    const [students, attendance, resources, pendingResources, complaints] =
+      await Promise.all([
+        query("SELECT COUNT(*) as count FROM users WHERE role = 'student'"),
+        query(
+          "SELECT COUNT(*) as count FROM attendance WHERE date = ? AND verified = 1",
+          [today],
+        ),
+        query(
+          "SELECT COUNT(*) as count FROM resources WHERE status = 'approved'",
+        ),
+        query(
+          "SELECT COUNT(*) as count FROM resources WHERE status = 'pending'",
+        ),
+        query(
+          "SELECT COUNT(*) as count FROM complaints WHERE status = 'pending'",
+        ),
+      ]);
 
     const stats = {
       totalStudents: students?.count || 0,
@@ -602,13 +691,22 @@ app.get("/api/admin/complaints", authenticateToken, isAdmin, (req, res) => {
   });
 });
 
-app.put("/api/admin/complaints/:id/resolve", authenticateToken, isAdmin, (req, res) => {
-  const { id } = req.params;
-  db.run("UPDATE complaints SET status = 'resolved' WHERE id = ?", [id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: "Complaint resolved", changes: this.changes });
-  });
-});
+app.put(
+  "/api/admin/complaints/:id/resolve",
+  authenticateToken,
+  isAdmin,
+  (req, res) => {
+    const { id } = req.params;
+    db.run(
+      "UPDATE complaints SET status = 'resolved' WHERE id = ?",
+      [id],
+      function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Complaint resolved", changes: this.changes });
+      },
+    );
+  },
+);
 
 app.get("/api/admin/feedback", authenticateToken, isAdmin, (req, res) => {
   db.all("SELECT * FROM feedback ORDER BY id DESC", (err, rows) => {
@@ -617,27 +715,41 @@ app.get("/api/admin/feedback", authenticateToken, isAdmin, (req, res) => {
   });
 });
 
-app.delete("/api/admin/feedback/:id", authenticateToken, isAdmin, (req, res) => {
-  const { id } = req.params;
-  db.run("DELETE FROM feedback WHERE id = ?", [id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: "Feedback deleted successfully", changes: this.changes });
-  });
-});
+app.delete(
+  "/api/admin/feedback/:id",
+  authenticateToken,
+  isAdmin,
+  (req, res) => {
+    const { id } = req.params;
+    db.run("DELETE FROM feedback WHERE id = ?", [id], function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({
+        message: "Feedback deleted successfully",
+        changes: this.changes,
+      });
+    });
+  },
+);
 
 // TimeTable
 app.get("/api/timetable", (req, res) => {
   const { className } = req.query;
   if (className) {
-    db.get("SELECT data FROM timetable WHERE className = ?", [className], (err, row) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(row ? JSON.parse(row.data) : null);
-    });
+    db.get(
+      "SELECT data FROM timetable WHERE className = ?",
+      [className],
+      (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(row ? JSON.parse(row.data) : null);
+      },
+    );
   } else {
     // Return the first one if no class specified, or null
     db.get("SELECT data, className FROM timetable LIMIT 1", (err, row) => {
       if (err) return res.status(500).json({ error: err.message });
-      res.json(row ? { data: JSON.parse(row.data), className: row.className } : null);
+      res.json(
+        row ? { data: JSON.parse(row.data), className: row.className } : null,
+      );
     });
   }
 });
@@ -645,7 +757,7 @@ app.get("/api/timetable", (req, res) => {
 app.get("/api/timetable/classes", (req, res) => {
   db.all("SELECT className FROM timetable", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
-    res.json(rows.map(r => r.className));
+    res.json(rows.map((r) => r.className));
   });
 });
 

@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Webcam from 'react-webcam';
-import { Camera, CheckCircle, XCircle, Info, Clock, Loader2, Calendar, UserCheck, Trash2, Download } from 'lucide-react';
+import { Camera, CheckCircle, XCircle, Info, Clock, Loader2, Calendar, UserCheck, Trash2, Download, QrCode, RefreshCw, ShieldCheck } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
+import { Html5Qrcode } from 'html5-qrcode';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
@@ -12,6 +14,10 @@ const Attendance = () => {
 
   const [activeTab, setActiveTab] = useState(isAdmin ? 'history' : 'mark');
   const [isScanning, setIsScanning] = useState(false);
+  const [isQRScanning, setIsQRScanning] = useState(false);
+  const [qrToken, setQrToken] = useState(null);
+  const [qrSessionToken, setQrSessionToken] = useState(null);
+  const [qrExpiresIn, setQrExpiresIn] = useState(0);
   const [result, setResult] = useState(null);
   const [studentData, setStudentData] = useState({
     name: user?.name || '',
@@ -89,6 +95,11 @@ const Attendance = () => {
       return;
     }
 
+    if (!qrToken) {
+      alert('Please scan the classroom QR code first');
+      return;
+    }
+
     try {
       setLocationError(null);
       await verifyLocation();
@@ -102,7 +113,8 @@ const Attendance = () => {
         try {
           const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/attendance`, {
             studentId: studentData.id,
-            status: 'present'
+            status: 'present',
+            qrToken: qrToken
           }, {
             headers: { Authorization: `Bearer ${token}` }
           });
@@ -126,6 +138,64 @@ const Attendance = () => {
       setLocationError(err);
     }
   };
+
+  const generateQR = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/generate-qr-session`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setQrSessionToken(response.data.token);
+      setQrExpiresIn(300); // 5 minutes
+    } catch (error) {
+      console.error("QR Generation failed", error);
+    }
+  };
+
+  useEffect(() => {
+    let timer;
+    if (qrExpiresIn > 0) {
+      timer = setInterval(() => {
+        setQrExpiresIn(prev => prev - 1);
+      }, 1000);
+    } else if (qrExpiresIn === 0 && isAdmin && activeTab === 'generate') {
+      generateQR();
+    }
+    return () => clearInterval(timer);
+  }, [qrExpiresIn, isAdmin, activeTab]);
+
+  useEffect(() => {
+    let html5QrCode;
+    if (isQRScanning) {
+      html5QrCode = new Html5Qrcode("reader");
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+      html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        (decodedText) => {
+          setQrToken(decodedText);
+          setIsQRScanning(false);
+          html5QrCode.stop().then(() => {
+            html5QrCode.clear();
+          });
+        },
+        (errorMessage) => {
+          // ignore
+        }
+      ).catch(err => {
+        console.error("QR Scanner failed", err);
+        setIsQRScanning(false);
+      });
+
+      return () => {
+        if (html5QrCode && html5QrCode.isScanning) {
+          html5QrCode.stop().then(() => {
+            html5QrCode.clear();
+          }).catch(err => console.error("Error stopping scanner", err));
+        }
+      };
+    }
+  }, [isQRScanning]);
   const fetchHistory = async () => {
     try {
       setLoading(true);
@@ -156,8 +226,8 @@ const Attendance = () => {
       headers.join(","),
       ...history.map(row => {
         const line = isAdmin
-          ? [row.name, row.studentId, row.date, "PRESENT", "AI Face + Geofencing"]
-          : [row.date, "PRESENT", "AI Face + Geofencing"];
+          ? [row.name, row.studentId, row.date, "PRESENT", "QR + Face + Geo"]
+          : [row.date, "PRESENT", "QR + Face + Geo"];
         return line.map(field => `"${field}"`).join(",");
       })
     ].join("\n");
@@ -199,23 +269,73 @@ const Attendance = () => {
           )}
 
           <div style={{ display: 'flex', background: 'var(--card-inner)', padding: '4px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+            {isAdmin && (
+              <button
+                onClick={() => setActiveTab('generate')}
+                style={{ padding: '10px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', background: activeTab === 'generate' ? 'var(--primary)' : 'transparent', color: activeTab === 'generate' ? 'white' : 'var(--text-dim)', border: 'none', cursor: 'pointer' }}
+              >
+                Broadcast
+              </button>
+            )}
             {!isAdmin && (
               <button
                 onClick={() => setActiveTab('mark')}
                 style={{ padding: '10px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', background: activeTab === 'mark' ? 'var(--primary)' : 'transparent', color: activeTab === 'mark' ? 'white' : 'var(--text-dim)', border: 'none', cursor: 'pointer' }}
               >
-                Mark Presence
+                Mark
               </button>
             )}
             <button
               onClick={() => setActiveTab('history')}
               style={{ padding: '10px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', background: activeTab === 'history' ? 'var(--primary)' : 'transparent', color: activeTab === 'history' ? 'white' : 'var(--text-dim)', border: 'none', cursor: 'pointer' }}
             >
-              {isAdmin ? 'Access Logs' : 'My History'}
+              Logs
             </button>
           </div>
         </div>
       </div>
+
+      {isAdmin && activeTab === 'generate' && (
+        <div className="glass-card" style={{ padding: '50px', textAlign: 'center' }}>
+          <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+            <div style={{ background: 'white', padding: '30px', borderRadius: '20px', display: 'inline-block', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', marginBottom: '30px', border: '8px solid var(--primary)' }}>
+              {qrSessionToken ? (
+                <QRCodeCanvas 
+                  value={qrSessionToken} 
+                  size={300} 
+                  level="H" 
+                  includeMargin={true}
+                />
+              ) : (
+                <div style={{ width: 300, height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Loader2 size={40} className="animate-spin" color="var(--primary)" />
+                </div>
+              )}
+            </div>
+            
+            <h2 style={{ marginBottom: '10px' }}>Session Active</h2>
+            <p style={{ color: 'var(--text-dim)', marginBottom: '20px' }}>Students must scan this QR to verify they are present in the classroom.</p>
+            
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center' }}>
+              <div style={{ background: 'var(--card-inner)', padding: '10px 20px', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Clock size={16} />
+                <span style={{ fontWeight: 'bold', fontFamily: 'monospace' }}>
+                  {Math.floor(qrExpiresIn / 60)}:{(qrExpiresIn % 60).toString().padStart(2, '0')}
+                </span>
+                <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>until refresh</span>
+              </div>
+              <button 
+                onClick={generateQR} 
+                className="btn-secondary" 
+                style={{ padding: '10px', borderRadius: '12px' }}
+                title="Refresh QR Now"
+              >
+                <RefreshCw size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {!isAdmin && activeTab === 'mark' && (
         <div className="glass-card" style={{ padding: '30px' }}>
@@ -232,6 +352,49 @@ const Attendance = () => {
                 </div>
               </div>
 
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div 
+                  onClick={() => setIsQRScanning(true)}
+                  style={{ 
+                    cursor: 'pointer',
+                    background: qrToken ? 'rgba(16, 185, 129, 0.1)' : 'var(--card-inner)', 
+                    border: qrToken ? '2px solid var(--success)' : '2px dashed var(--border)',
+                    borderRadius: '12px',
+                    padding: '20px',
+                    textAlign: 'center',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  <div style={{ marginBottom: '10px', color: qrToken ? 'var(--success)' : 'var(--primary)' }}>
+                    {qrToken ? <ShieldCheck size={30} style={{ margin: '0 auto' }} /> : <QrCode size={30} style={{ margin: '0 auto' }} />}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: '700' }}>
+                    {qrToken ? 'QR SCANNED' : 'SCAN SESSION QR'}
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--card-inner)', border: '1px solid var(--border)', borderRadius: '12px', padding: '10px 15px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Security Status</div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: '600', color: qrToken ? 'var(--success)' : 'var(--warning)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: qrToken ? 'var(--success)' : 'var(--warning)' }}></div>
+                    {qrToken ? 'Session Validated' : 'Awaiting QR Scan'}
+                  </div>
+                </div>
+              </div>
+
+              {isQRScanning && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                  <div id="reader" style={{ width: '100%', maxWidth: '400px', background: 'white', borderRadius: '20px', overflow: 'hidden' }}></div>
+                  <button 
+                    onClick={() => setIsQRScanning(false)}
+                    className="btn-secondary"
+                    style={{ marginTop: '20px', padding: '12px 30px' }}
+                  >
+                    Cancel Scan
+                  </button>
+                </div>
+              )}
+
               <div style={{ position: 'relative', borderRadius: '15px', overflow: 'hidden', border: '2px solid var(--border)', background: '#000' }}>
                 <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" style={{ width: '100%', display: 'block' }} />
                 {isScanning && (
@@ -245,8 +408,8 @@ const Attendance = () => {
               <button
                 className="btn-primary"
                 onClick={startScan}
-                disabled={isScanning || isVerifyingLocation}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', height: '50px', position: 'relative' }}
+                disabled={isScanning || isVerifyingLocation || !qrToken}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', height: '50px', position: 'relative', opacity: !qrToken ? 0.6 : 1 }}
               >
                 {isVerifyingLocation ? (
                   <>
@@ -254,7 +417,7 @@ const Attendance = () => {
                   </>
                 ) : (
                   <>
-                    <Camera size={20} /> SCAN & SUBMIT
+                    <Camera size={20} /> FINAL VERIFICATION
                   </>
                 )}
               </button>
@@ -266,8 +429,15 @@ const Attendance = () => {
               )}
             </div>
             <div style={{ background: 'var(--card-inner)', borderRadius: '15px', padding: '20px', border: '1px solid var(--border)' }}>
-              <h4 style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}><Info size={18} color="var(--primary)" /> Smart Verification</h4>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', lineHeight: 1.6 }}>Your identity and location are verified using AI and Geofencing. Once confirmed, your attendance is recorded immediately without further review.</p>
+              <h4 style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}><ShieldCheck size={18} color="var(--primary)" /> Multi-Factor Security</h4>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', lineHeight: 1.6 }}>Your attendance is secured via Three-Layer Verification:
+                <br /><br />
+                <strong>1. Dynamic Session QR:</strong> Scanned from the instructor's screen.
+                <br />
+                <strong>2. Precise Geofencing:</strong> Verified classroom radius (100m).
+                <br />
+                <strong>3. AI Identity check:</strong> Facial feature verification.
+              </p>
             </div>
           </div>
         </div>
@@ -304,7 +474,7 @@ const Attendance = () => {
                         </span>
                       </td>
                       <td style={{ padding: '15px 25px', color: 'var(--text-dim)', fontSize: '0.85rem' }}>
-                        AI Face + Geofencing
+                        QR + Face + Geo
                       </td>
                     </tr>
                   ))}
