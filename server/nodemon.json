@@ -1,4 +1,0 @@
-{
-  "ignore": ["*.sqlite", "database.sqlite-journal", "uploads/*"],
-  "ext": "js,json"
-}
