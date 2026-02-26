@@ -21,7 +21,7 @@ const StatusBadge = ({ status }) => {
 };
 
 const Complaints = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const isAdmin = user?.role === 'admin';
 
   const [showForm, setShowForm] = useState(!isAdmin);
@@ -35,7 +35,9 @@ const Complaints = () => {
     if (!isAdmin) return;
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:5001/api/admin/complaints');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/complaints`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setComplaints(response.data);
     } catch (error) {
       console.error('Error fetching complaints:', error);
@@ -46,7 +48,9 @@ const Complaints = () => {
 
   const handleResolve = async (id) => {
     try {
-      await axios.put(`http://localhost:5001/api/admin/complaints/${id}/resolve`);
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/complaints/${id}/resolve`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       fetchComplaints();
     } catch (error) {
       console.error('Error resolving complaint:', error);
@@ -62,7 +66,7 @@ const Complaints = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await axios.post('http://localhost:5001/api/complaints', formData);
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/complaints`, formData);
       setSubmittedSuccess(true);
       setFormData({ title: '', description: '', category: 'Infrastructure' });
       setTimeout(() => setSubmittedSuccess(false), 5000);

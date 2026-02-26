@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, MessageSquare, User, Send, CheckCircle, Loader2, Award } from 'lucide-react';
+import { Star, MessageSquare, User, Send, CheckCircle, Loader2, Award, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -15,7 +15,7 @@ const faculty = [
 ];
 
 const Feedback = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const isAdmin = user?.role === 'admin';
 
   const [selectedFaculty, setSelectedFaculty] = useState(null);
@@ -37,12 +37,26 @@ const Feedback = () => {
   const fetchAdminFeedback = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:5001/api/admin/feedback');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/feedback`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setFeedbackList(response.data);
     } catch (error) {
       console.error('Error fetching admin feedback:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this feedback?')) return;
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/feedback/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchAdminFeedback();
+    } catch (error) {
+      alert('Failed to delete feedback');
     }
   };
 
@@ -54,7 +68,7 @@ const Feedback = () => {
 
     setIsSubmitting(true);
     try {
-      await axios.post('http://localhost:5001/api/feedback', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/feedback`, {
         facultyName: selectedFaculty.name,
         rating,
         comment
@@ -101,13 +115,21 @@ const Feedback = () => {
                   border: '1px solid var(--border-light)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '12px'
+                  gap: '12px',
+                  position: 'relative'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h4 style={{ fontSize: '1rem' }}>{item.facultyName}</h4>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase' }}>Submission</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(245, 158, 11, 0.1)', padding: '4px 10px', borderRadius: '8px' }}>
+                      <Star size={14} fill="var(--warning)" color="var(--warning)" />
+                      <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--warning)' }}>{item.rating || 0}/5</span>
                     </div>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '5px' }}
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.5', fontStyle: 'italic' }}>
                     "{item.comment || 'No comment provided.'}"
@@ -181,7 +203,21 @@ const Feedback = () => {
                 Providing feedback for <strong>{selectedFaculty.name}</strong>.
               </p>
 
-              {}
+              <div style={{ marginBottom: '25px' }}>
+                <p style={{ marginBottom: '10px', fontSize: '0.9rem' }}>Quality of Interaction</p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      size={24}
+                      onClick={() => setRating(star)}
+                      fill={rating >= star ? 'var(--warning)' : 'transparent'}
+                      color={rating >= star ? 'var(--warning)' : 'var(--text-muted)'}
+                      style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                    />
+                  ))}
+                </div>
+              </div>
 
               <div style={{ marginBottom: '25px' }}>
                 <p style={{ marginBottom: '10px', fontSize: '0.9rem' }}>Additional Comments</p>

@@ -21,7 +21,7 @@ const Register = () => {
     setError('');
     setLoading(true);
     try {
-      await axios.post('http://localhost:5001/api/register', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/register`, {
         ...formData,
         role
       });

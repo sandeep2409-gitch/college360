@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Search, Mail, User, Trash2, Shield, Loader2, Check, X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
 const ManageStudents = () => {
+  const { token } = useAuth();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,7 +20,9 @@ const ManageStudents = () => {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5001/api/admin/students');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/students`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setStudents(response.data);
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -28,8 +32,8 @@ const ManageStudents = () => {
   };
 
   useEffect(() => {
-    fetchStudents();
-  }, []);
+    if (token) fetchStudents();
+  }, [token]);
 
   const [successData, setSuccessData] = useState(null);
 
@@ -37,7 +41,9 @@ const ManageStudents = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const response = await axios.post('http://localhost:5001/api/admin/students', newStudent);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/students`, newStudent, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (response.status === 201) {
         setStudents([response.data, ...students]);
         setSuccessData({ ...newStudent });
@@ -53,7 +59,9 @@ const ManageStudents = () => {
   const handleDeleteStudent = async (id) => {
     if (window.confirm('Are you sure you want to delete this student?')) {
       try {
-        await axios.delete(`http://localhost:5001/api/admin/students/${id}`);
+        await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/students/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         setStudents(students.filter(s => s.id !== id));
       } catch (error) {
         console.error('Error deleting student:', error);

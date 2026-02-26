@@ -4,11 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
 const Resources = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [resources, setResources] = useState([]);
+  const [pendingResources, setPendingResources] = useState([]);
+  const [activeTab, setActiveTab] = useState('all'); // 'all' or 'pending'
   const [isUploading, setIsUploading] = useState(false);
 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -20,7 +22,7 @@ const Resources = () => {
   const fetchResources = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5001/api/resources');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/resources`);
 
       const data = response.data.map(r => ({
         ...r,
@@ -29,6 +31,18 @@ const Resources = () => {
         date: new Date().toISOString().split('T')[0]
       }));
       setResources(data);
+
+      if (user?.role === 'admin') {
+        const pendingRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/resources/pending`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setPendingResources(pendingRes.data.map(r => ({
+          ...r,
+          type: r.fileUrl ? r.fileUrl.split('.').pop().toUpperCase() : 'PDF',
+          size: '1.2 MB',
+          date: new Date().toISOString().split('T')[0]
+        })));
+      }
     } catch (error) {
       console.error('Error fetching resources:', error);
     } finally {
@@ -38,7 +52,7 @@ const Resources = () => {
 
   useEffect(() => {
     fetchResources();
-  }, []);
+  }, [user, token]);
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -54,9 +68,10 @@ const Resources = () => {
       formData.append('userId', user?.id || 1);
       formData.append('file', selectedFile);
 
-      const response = await axios.post('http://localhost:5001/api/resources/upload', formData, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/resources/upload`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
         }
       });
 
@@ -68,20 +83,54 @@ const Resources = () => {
           type: response.data.type,
           size: response.data.size,
           date: response.data.date,
-          fileUrl: response.data.fileUrl
+          fileUrl: response.data.fileUrl,
+          status: response.data.status
         };
 
-        setResources([resourceToAdd, ...resources]);
+        if (resourceToAdd.status === 'approved') {
+          setResources([resourceToAdd, ...resources]);
+          alert('Resource uploaded and published successfully!');
+        } else {
+          alert('Resource uploaded successfully! It will be visible after admin approval.');
+        }
+        
         setShowUploadModal(false);
         setNewResource({ title: '', category: 'Computer Science' });
         setSelectedFile(null);
-        alert('Resource uploaded successfully!');
       }
     } catch (error) {
       console.error('Upload failed:', error);
       alert('Upload failed. Please try again.');
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/resources/${id}/approve`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const approved = pendingResources.find(r => r.id === id);
+      setPendingResources(pendingResources.filter(r => r.id !== id));
+      setResources([approved, ...resources]);
+      alert('Resource approved successfully!');
+    } catch (error) {
+      alert('Failed to approve resource');
+    }
+  };
+
+  const handleReject = async (id) => {
+    if (window.confirm('Are you sure you want to reject and delete this resource?')) {
+      try {
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/resources/${id}/reject`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setPendingResources(pendingResources.filter(r => r.id !== id));
+        alert('Resource rejected.');
+      } catch (error) {
+        alert('Failed to reject resource');
+      }
     }
   };
 
@@ -96,7 +145,9 @@ const Resources = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this resource?')) {
       try {
-        await axios.delete(`http://localhost:5001/api/resources/${id}`);
+        await axios.delete(`${import.meta.env.VITE_API_URL}/api/resources/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         setResources(resources.filter(r => r.id !== id));
         alert('Resource deleted successfully!');
       } catch (error) {
@@ -106,10 +157,18 @@ const Resources = () => {
     }
   };
 
+  const filteredResources = (activeTab === 'all' ? resources : pendingResources)
+    .filter(r => r.title.toLowerCase().includes(searchTerm.toLowerCase()));
+
   return (
     <div className="resources-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <h1>Resource Sharing</h1>
+        <div>
+          <h1>Resource Sharing</h1>
+          <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>
+            {user?.role === 'admin' ? 'Manage and approve educational resources.' : 'Access and share learning materials.'}
+          </p>
+        </div>
         <button
           className="btn-primary"
           onClick={() => setShowUploadModal(true)}
@@ -118,6 +177,47 @@ const Resources = () => {
           <Upload size={18} /> Upload Resource
         </button>
       </div>
+
+      {user?.role === 'admin' && (
+        <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>
+          <button 
+            onClick={() => setActiveTab('all')}
+            style={{ 
+              padding: '8px 20px', 
+              borderRadius: '6px', 
+              background: activeTab === 'all' ? 'var(--primary)' : 'transparent',
+              color: activeTab === 'all' ? 'white' : 'var(--text-dim)',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: '500'
+            }}
+          >
+            Approved Resources
+          </button>
+          <button 
+            onClick={() => setActiveTab('pending')}
+            style={{ 
+              padding: '8px 20px', 
+              borderRadius: '6px', 
+              background: activeTab === 'pending' ? '#f59e0b' : 'transparent',
+              color: activeTab === 'pending' ? 'white' : 'var(--text-dim)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontWeight: '500'
+            }}
+          >
+            Pending Approval
+            {pendingResources.length > 0 && (
+              <span style={{ background: 'white', color: '#f59e0b', padding: '1px 6px', borderRadius: '10px', fontSize: '0.75rem' }}>
+                {pendingResources.length}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
 
       {showUploadModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', zIndex: 2000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -161,6 +261,9 @@ const Resources = () => {
                   style={{ padding: '8px' }}
                 />
               </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>
+                {user?.role === 'admin' ? 'This resource will be published immediately.' : 'This resource will be sent to admins for approval before being published.'}
+              </p>
               <button className="btn-primary" type="submit" disabled={isUploading} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                 {isUploading ? <Loader2 className="animate-spin" size={18} /> : <Check size={18} />}
                 {isUploading ? 'Uploading...' : 'Confirm Upload'}
@@ -193,40 +296,67 @@ const Resources = () => {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-          {resources.filter(r => r.title.toLowerCase().includes(searchTerm.toLowerCase())).map(res => (
-            <div key={res.id} className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '15px 25px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '12px', borderRadius: '10px' }}>
-                  <FileText color="var(--primary)" />
-                </div>
-                <div>
-                  <h4 style={{ marginBottom: '4px' }}>{res.title}</h4>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>
-                    {res.category} • {res.type} • {res.size} • {res.date}
-                  </p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                {user?.role === 'admin' && (
-                  <button
-                    onClick={() => handleDelete(res.id)}
-                    style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}
-                    title="Delete Resource"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                )}
-                <button
-                  onClick={() => handleDownload(res.fileUrl)}
-                  style={{ background: 'var(--card-inner)', color: 'var(--text-main)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)' }}
-                >
-                  <Download size={20} />
-                </button>
-              </div>
+          {filteredResources.length === 0 ? (
+            <div className="glass-card" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-dim)' }}>
+              No resources found.
             </div>
-          ))}
+          ) : (
+            filteredResources.map(res => (
+              <div key={res.id} className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '15px 25px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                  <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '12px', borderRadius: '10px' }}>
+                    <FileText color="var(--primary)" />
+                  </div>
+                  <div>
+                    <h4 style={{ marginBottom: '4px' }}>{res.title}</h4>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>
+                      {res.category} • {res.type} • {res.size} • {res.date}
+                      {res.uploaderName && ` • Uploaded by ${res.uploaderName}`}
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  {activeTab === 'pending' && user?.role === 'admin' ? (
+                    <>
+                      <button
+                        onClick={() => handleApprove(res.id)}
+                        style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '10px 15px', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.2)', display: 'flex', alignItems: 'center', gap: '5px' }}
+                      >
+                        <Check size={18} /> Approve
+                      </button>
+                      <button
+                        onClick={() => handleReject(res.id)}
+                        style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', padding: '10px 15px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'flex', alignItems: 'center', gap: '5px' }}
+                      >
+                        <X size={18} /> Reject
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {user?.role === 'admin' && (
+                        <button
+                          onClick={() => handleDelete(res.id)}
+                          style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+                          title="Delete Resource"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDownload(res.fileUrl)}
+                        style={{ background: 'var(--card-inner)', color: 'var(--text-main)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)' }}
+                      >
+                        <Download size={20} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
-      )}
+      )
+}
 
       <style>{`
         .animate-spin {

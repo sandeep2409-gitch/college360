@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Webcam from 'react-webcam';
-import { Camera, CheckCircle, XCircle, Info, Clock, Loader2, Calendar, UserCheck, Trash2 } from 'lucide-react';
+import { Camera, CheckCircle, XCircle, Info, Clock, Loader2, Calendar, UserCheck, Trash2, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
 const Attendance = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const isAdmin = user?.role === 'admin';
   const webcamRef = useRef(null);
 
@@ -100,9 +100,11 @@ const Attendance = () => {
 
       setTimeout(async () => {
         try {
-          const response = await axios.post('http://localhost:5001/api/attendance', {
+          const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/attendance`, {
             studentId: studentData.id,
             status: 'present'
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
           });
 
           setIsScanning(false);
@@ -127,14 +129,48 @@ const Attendance = () => {
   const fetchHistory = async () => {
     try {
       setLoading(true);
-      const endpoint = isAdmin ? 'http://localhost:5001/api/admin/pending-attendance' : `http://localhost:5001/api/attendance/${user.id}`;
-      const response = await axios.get(endpoint);
+      const endpoint = isAdmin ? `${import.meta.env.VITE_API_URL}/api/admin/pending-attendance` : `${import.meta.env.VITE_API_URL}/api/attendance/${user.id}`;
+      const response = await axios.get(endpoint, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setHistory(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleExport = () => {
+    if (history.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    // Prepare CSV data
+    const headers = isAdmin 
+      ? ["Student Name", "Student ID", "Date", "Status", "Method"]
+      : ["Date", "Status", "Method"];
+    
+    const csvContent = [
+      headers.join(","),
+      ...history.map(row => {
+        const line = isAdmin
+          ? [row.name, row.studentId, row.date, "PRESENT", "AI Face + Geofencing"]
+          : [row.date, "PRESENT", "AI Face + Geofencing"];
+        return line.map(field => `"${field}"`).join(",");
+      })
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `attendance_report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   useEffect(() => {
@@ -151,21 +187,33 @@ const Attendance = () => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', background: 'var(--card-inner)', padding: '4px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-          {!isAdmin && (
+        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+          {isAdmin && activeTab === 'history' && (
             <button
-              onClick={() => setActiveTab('mark')}
-              style={{ padding: '10px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', background: activeTab === 'mark' ? 'var(--primary)' : 'transparent', color: activeTab === 'mark' ? 'white' : 'var(--text-dim)', border: 'none', cursor: 'pointer' }}
+              onClick={handleExport}
+              className="btn-primary"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#334155', padding: '10px 20px' }}
             >
-              Mark Presence
+              <Download size={18} /> Export CSV
             </button>
           )}
-          <button
-            onClick={() => setActiveTab('history')}
-            style={{ padding: '10px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', background: activeTab === 'history' ? 'var(--primary)' : 'transparent', color: activeTab === 'history' ? 'white' : 'var(--text-dim)', border: 'none', cursor: 'pointer' }}
-          >
-            {isAdmin ? 'Access Logs' : 'My History'}
-          </button>
+
+          <div style={{ display: 'flex', background: 'var(--card-inner)', padding: '4px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+            {!isAdmin && (
+              <button
+                onClick={() => setActiveTab('mark')}
+                style={{ padding: '10px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', background: activeTab === 'mark' ? 'var(--primary)' : 'transparent', color: activeTab === 'mark' ? 'white' : 'var(--text-dim)', border: 'none', cursor: 'pointer' }}
+              >
+                Mark Presence
+              </button>
+            )}
+            <button
+              onClick={() => setActiveTab('history')}
+              style={{ padding: '10px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', background: activeTab === 'history' ? 'var(--primary)' : 'transparent', color: activeTab === 'history' ? 'white' : 'var(--text-dim)', border: 'none', cursor: 'pointer' }}
+            >
+              {isAdmin ? 'Access Logs' : 'My History'}
+            </button>
+          </div>
         </div>
       </div>
 

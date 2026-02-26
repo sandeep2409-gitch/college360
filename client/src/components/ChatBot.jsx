@@ -46,7 +46,7 @@ const ChatBot = () => {
         parts: [{ text: msg.text }]
       }));
 
-      const response = await axios.post('http://localhost:5001/api/chat', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/chat`, {
         message: messageToSend,
         history: history,
         userContext: user ? { name: user.name, role: user.role, id: user.id } : null

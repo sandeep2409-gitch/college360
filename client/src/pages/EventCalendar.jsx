@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 const EventCalendar = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const isAdmin = user?.role === 'admin';
 
   const [events, setEvents] = useState([]);
@@ -23,7 +23,7 @@ const EventCalendar = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5001/api/events');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/events`);
       setEvents(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -41,9 +41,13 @@ const EventCalendar = () => {
     if (!isAdmin) return;
     try {
       if (editingEvent) {
-        await axios.put(`http://localhost:5001/api/events/${editingEvent.id}`, formData);
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/events/${editingEvent.id}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
       } else {
-        await axios.post('http://localhost:5001/api/events', formData);
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/events`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
       }
       fetchEvents();
       setShowModal(false);
@@ -57,7 +61,9 @@ const EventCalendar = () => {
     if (!isAdmin) return;
     if (window.confirm('Are you sure you want to delete this event?')) {
       try {
-        await axios.delete(`http://localhost:5001/api/events/${id}`);
+        await axios.delete(`${import.meta.env.VITE_API_URL}/api/events/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         fetchEvents();
       } catch (error) {
         alert('Error deleting event');

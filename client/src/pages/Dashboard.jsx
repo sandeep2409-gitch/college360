@@ -6,7 +6,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const isAdmin = user?.role === 'admin';
 
   const [stats, setStats] = useState({
@@ -33,19 +33,23 @@ const Dashboard = () => {
     try {
       setLoading(true);
       setError(null);
-      if (isAdmin) {
-        const response = await axios.get('http://localhost:5001/api/admin/stats');
+      const config = {
+        headers: { Authorization: `Bearer ${token}` }
+      };
 
+      if (isAdmin) {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/stats`, config);
         setStats(prev => ({ ...prev, ...response.data }));
       } else {
-        const response = await axios.get(`http://localhost:5001/api/attendance/${user.id}`);
-        const total = response.data.length;
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/attendance/${user.id}`, config);
+        const history = Array.isArray(response.data) ? response.data : [];
+        const total = history.length;
 
         setStudentStats({
           attendancePercentage: total > 0 ? 100 : 0,
           daysPresent: total,
           totalDays: total,
-          recentHistory: Array.isArray(response.data) ? response.data.slice(0, 5) : [],
+          recentHistory: history.slice(0, 5),
           chartData: [
             { name: 'Verified Presence', value: total, color: '#10b981' }
           ]
@@ -60,8 +64,8 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (user) fetchData();
-  }, [user?.id, isAdmin]);
+    if (user && token) fetchData();
+  }, [user?.id, isAdmin, token]);
 
   const StatCard = ({ icon: Icon, label, value, color }) => {
 
@@ -194,15 +198,15 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
           <div className="glass-card" style={{ padding: '32px' }}>
             <h4 style={{ marginBottom: '24px', fontSize: '1.1rem', fontWeight: '700' }}>Academic Hub</h4>
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {[
-                { to: '/timetable', label: 'Academic Schedule (Time Table)', icon: Clock, color: '#f59e0b' },
-                { to: '/resources', label: 'E-Library & Courseware', icon: BookOpen, color: '#6366f1' },
-                { to: '/calendar', label: 'University Schedule', icon: Calendar, color: '#3b82f6' },
-                { to: '/feedback', label: 'Instructor Feedback', icon: MessageSquare, color: '#10b981' }
+                { to: '/timetable', label: 'Academic Schedule (Time Table)', icon: Clock, color: '#f59e0b', desc: 'View today\'s class lineup' },
+                { to: '/resources', label: 'E-Library & Courseware', icon: BookOpen, color: '#6366f1', desc: 'Access study materials' },
+                { to: '/calendar', label: 'University Schedule', icon: Calendar, color: '#3b82f6', desc: 'Upcoming exam dates' },
+                { to: '/profile', label: 'My Digital Identity', icon: User, color: '#10b981', desc: 'View personal records' }
               ].map((link, idx) => (
                 <Link key={idx} to={link.to} style={{
                   display: 'flex',
@@ -221,7 +225,10 @@ const Dashboard = () => {
                   <div style={{ background: `${link.color}20`, padding: '10px', borderRadius: '12px', color: link.color }}>
                     <link.icon size={18} />
                   </div>
-                  {link.label}
+                  <div>
+                    <div style={{ fontSize: '0.9rem' }}>{link.label}</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '400' }}>{link.desc}</div>
+                  </div>
                   <ChevronRight size={16} style={{ marginLeft: 'auto', opacity: 0.5 }} />
                 </Link>
               ))}
@@ -229,38 +236,37 @@ const Dashboard = () => {
           </div>
 
           <div className="glass-card" style={{ padding: '32px' }}>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h4 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Access Logs</h4>
-              <Link to="/attendance" style={{ fontSize: '0.8rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: '800', letterSpacing: '0.05em' }}>EXPORT DATA</Link>
-            </header>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {Array.isArray(studentStats.recentHistory) && studentStats.recentHistory.map((log, i) => (
-                <div key={i} style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '16px 20px',
-                  background: 'var(--card-inner)',
-                  borderRadius: '16px',
-                  fontSize: '0.9rem',
-                  border: '1px solid var(--border)'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <div style={{ width: '10px', height: '10px', background: 'var(--success)', borderRadius: '50%', boxShadow: '0 0 10px var(--success)' }} />
-                    <span style={{ fontWeight: '600' }}>{log.date}</span>
-                  </div>
-                  <span style={{ color: 'var(--success)', fontWeight: '800', fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.1)', padding: '6px 12px', borderRadius: '50px' }}>
-                    AUTHENTICATED
-                  </span>
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Next Milestone</h4>
+                <Link to="/calendar" style={{ fontSize: '0.75rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: '800' }}>VIEW CALENDAR</Link>
+             </div>
+             
+             <div style={{ background: 'var(--card-inner)', border: '1px solid var(--primary-glow)', borderRadius: '24px', padding: '24px', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--primary-glow)', borderRadius: '50%', filter: 'blur(20px)', opacity: 0.3 }}></div>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                    <div style={{ background: 'var(--bg-card)', padding: '12px', borderRadius: '16px', textAlign: 'center', minWidth: '60px', border: '1px solid var(--border)' }}>
+                        <span style={{ display: 'block', fontSize: '1.2rem', fontWeight: '900', color: 'var(--primary)' }}>28</span>
+                        <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase' }}>FEB</span>
+                    </div>
+                    <div>
+                        <h5 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '4px' }}>Mid-Term Assessment</h5>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Main Hall • 09:30 AM</p>
+                    </div>
                 </div>
-              ))}
-              {(!studentStats.recentHistory || studentStats.recentHistory.length === 0) && (
-                <div style={{ textAlign: 'center', padding: '60px 0' }}>
-                   <div style={{ opacity: 0.2, marginBottom: '10px' }}><Clock size={40} style={{ margin: '0 auto' }} /></div>
-                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No recent activity detected.</p>
-                </div>
-              )}
-            </div>
+             </div>
+
+             <div style={{ marginTop: '24px' }}>
+               <h4 style={{ marginBottom: '16px', fontSize: '1rem', fontWeight: '700', opacity: 0.8 }}>Recent Activity</h4>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                 {(studentStats.recentHistory || []).slice(0, 3).map((log, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.85rem' }}>
+                        <div style={{ width: '8px', height: '8px', background: 'var(--success)', borderRadius: '50%' }}></div>
+                        <span style={{ color: 'var(--text-dim)' }}>Authenticated at Main Entrance</span>
+                        <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{log.date}</span>
+                    </div>
+                 ))}
+               </div>
+             </div>
           </div>
         </div>
       </div>

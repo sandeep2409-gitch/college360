@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Download, Edit2, Check, X, ShieldAlert } from 'lucide-react';
+import { Clock, Download, Edit2, Check, X, ShieldAlert, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 
 const TimeTable = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [classes, setClasses] = useState([]);
+  const [selectedClass, setSelectedClass] = useState('');
+  const [newClassName, setNewClassName] = useState('');
+  const [showAddClassModal, setShowAddClassModal] = useState(false);
 
   const periods = [
     { id: 1, label: 'Period 1', time: '09:15AM to 10:05AM' },
@@ -18,77 +24,97 @@ const TimeTable = () => {
   ];
 
   const initialSchedule = {
-    'Monday': [
-      { subject: 'Machine Learning', teacher: 'KOPPULA DENNIS' },
-      { subject: 'Probability and Statistics', teacher: 'SAHERA BEGAM' },
-      { subject: 'Soft Skills', teacher: '' },
-      { subject: 'Soft Skills', teacher: '' },
-      { subject: 'Digital Logical and Computer Organization', teacher: 'DIVILI V BRAHMA NARESH KUMAR' },
-      { subject: 'Machine Learning', teacher: 'KOPPULA DENNIS' },
-      { subject: 'Design Thinking & Innovation', teacher: '' },
-    ],
-    'Tuesday': [
-      { subject: 'Machine Learning', teacher: 'KOPPULA DENNIS' },
-      { subject: 'Data Base Management Systems', teacher: 'POLAVARAPU BABY NAVYA' },
-      { subject: 'CRT', teacher: '' },
-      { subject: 'CRT', teacher: '' },
-      { subject: 'Probability and Statistics', teacher: 'SAHERA BEGAM' },
-      { subject: 'Digital Logical and Computer Organization', teacher: 'DIVILI V BRAHMA NARESH KUMAR' },
-      { subject: 'Data Base Management Systems', teacher: 'POLAVARAPU BABY NAVYA' },
-    ],
-    'Wednesday': [
-      { subject: 'Data Base Management Systems', teacher: 'POLAVARAPU BABY NAVYA' },
-      { subject: 'Probability and Statistics', teacher: 'SAHERA BEGAM' },
-      { subject: 'Optimization Techniques', teacher: '' },
-      { subject: 'Optimization Techniques', teacher: '' },
-      { subject: 'Full Stack Development-1', teacher: 'PERNEEDI CHAKRADHARA RAO' },
-      { subject: 'Full Stack Development-1', teacher: 'PERNEEDI CHAKRADHARA RAO' },
-      { subject: 'Full Stack Development-1', teacher: 'PERNEEDI CHAKRADHARA RAO' },
-    ],
-    'Thursday': [
-      { subject: 'Digital Logical and Computer Organization', teacher: 'DIVILI V BRAHMA NARESH KUMAR' },
-      { subject: 'Data Base Management Systems', teacher: 'POLAVARAPU BABY NAVYA' },
-      { subject: 'Optimization Techniques', teacher: '' },
-      { subject: 'Optimization Techniques', teacher: '' },
-      { subject: 'DBMS LAB', teacher: 'POLAVARAPU BABY NAVYA' },
-      { subject: 'DBMS LAB', teacher: 'POLAVARAPU BABY NAVYA' },
-      { subject: 'DBMS LAB', teacher: 'POLAVARAPU BABY NAVYA' },
-    ],
-    'Friday': [
-      { subject: 'Probability and Statistics', teacher: 'SAHERA BEGAM' },
-      { subject: 'AI and ML LAB', teacher: 'KOPPULA DENNIS' },
-      { subject: 'AI and ML LAB', teacher: 'KOPPULA DENNIS' },
-      { subject: 'AI and ML LAB', teacher: 'KOPPULA DENNIS' },
-      { subject: 'Probability and Statistics', teacher: 'SAHERA BEGAM' },
-      { subject: 'Optimization Techniques', teacher: '' },
-      { subject: 'Optimization Techniques', teacher: '' },
-    ],
-    'Saturday': [
-      { subject: 'Probability and Statistics', teacher: 'SAHERA BEGAM' },
-      { subject: 'Machine Learning', teacher: 'KOPPULA DENNIS' },
-      { subject: 'Digital Logical and Computer Organization', teacher: 'DIVILI V BRAHMA NARESH KUMAR' },
-      { subject: 'Design Thinking & Innovation', teacher: '' },
-      { subject: 'Data Base Management Systems', teacher: 'POLAVARAPU BABY NAVYA' },
-      { subject: 'Machine Learning', teacher: 'KOPPULA DENNIS' },
-      { subject: 'Digital Logical and Computer Organization', teacher: 'DIVILI V BRAHMA NARESH KUMAR' },
-    ],
+    'Monday': Array(7).fill({ subject: '', teacher: '' }),
+    'Tuesday': Array(7).fill({ subject: '', teacher: '' }),
+    'Wednesday': Array(7).fill({ subject: '', teacher: '' }),
+    'Thursday': Array(7).fill({ subject: '', teacher: '' }),
+    'Friday': Array(7).fill({ subject: '', teacher: '' }),
+    'Saturday': Array(7).fill({ subject: '', teacher: '' }),
   };
 
-  const [schedule, setSchedule] = useState(() => {
-    const saved = localStorage.getItem('college_timetable');
-    return saved ? JSON.parse(saved) : initialSchedule;
-  });
+  const [schedule, setSchedule] = useState(initialSchedule);
+
+  const fetchClasses = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/timetable/classes`);
+      setClasses(response.data);
+      if (response.data.length > 0 && !selectedClass) {
+        setSelectedClass(response.data[0]);
+      } else if (response.data.length === 0) {
+        if(isAdmin) setSelectedClass('III-B.Tech-CSE');
+      }
+    } catch (err) {
+      console.error("Failed to fetch classes:", err);
+    }
+  };
+
+  const fetchTimetable = async (className) => {
+    if (!className) return;
+    try {
+      setLoading(true);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/timetable?className=${className}`);
+      if (response.data) {
+        setSchedule(response.data);
+      } else {
+        setSchedule(initialSchedule);
+      }
+    } catch (err) {
+      console.error("Failed to fetch timetable:", err);
+      setSchedule(initialSchedule);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClasses();
+  }, []);
+
+  useEffect(() => {
+    if (selectedClass) {
+      fetchTimetable(selectedClass);
+    }
+  }, [selectedClass]);
 
   const handleCellChange = (day, periodIndex, field, value) => {
-    const newSchedule = { ...schedule };
+    const newSchedule = JSON.parse(JSON.stringify(schedule));
     newSchedule[day][periodIndex][field] = value;
     setSchedule(newSchedule);
   };
 
-  const saveTimetable = () => {
-    localStorage.setItem('college_timetable', JSON.stringify(schedule));
-    setIsEditing(false);
+  const saveTimetable = async () => {
+    try {
+      setLoading(true);
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/timetable`, 
+        { className: selectedClass, data: schedule }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setIsEditing(false);
+      fetchClasses();
+      alert("Timetable saved successfully!");
+    } catch (err) {
+      alert("Failed to save changes: " + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleAddClass = () => {
+    if (!newClassName.trim()) return;
+    if (classes.includes(newClassName)) {
+      alert("Class already exists");
+      return;
+    }
+    setSelectedClass(newClassName);
+    setSchedule(initialSchedule);
+    setIsEditing(true);
+    setShowAddClassModal(false);
+    setNewClassName('');
+  };
+
+  if (loading && !isEditing && classes.length > 0) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}><Loader2 className="animate-spin" size={40} /></div>;
+  }
 
   return (
     <div className="timetable-page animate-slide-up" style={{ padding: '20px' }}>
@@ -96,16 +122,46 @@ const TimeTable = () => {
         <div>
           <span style={{ fontSize: '0.8rem', fontWeight: '800', color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Institutional Schedule</span>
           <h1 className="page-title" style={{ fontSize: '2rem' }}>Class Time Table</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '10px' }}>
+            <span style={{ fontSize: '0.9rem', color: 'var(--text-dim)', fontWeight: '600' }}>Selected Class:</span>
+            <select 
+              value={selectedClass} 
+              onChange={(e) => setSelectedClass(e.target.value)}
+              style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-main)',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                fontSize: '0.9rem',
+                minWidth: '200px'
+              }}
+            >
+              {classes.length === 0 && !isAdmin && <option>No classes available</option>}
+              {classes.map(c => <option key={c} value={c}>{c}</option>)}
+              {isAdmin && !classes.includes(selectedClass) && selectedClass && <option value={selectedClass}>{selectedClass} (Draft)</option>}
+            </select>
+            {isAdmin && (
+              <button 
+                onClick={() => setShowAddClassModal(true)}
+                className="btn-primary"
+                style={{ padding: '6px 12px', fontSize: '0.8rem', background: '#334155' }}
+              >
+                + New Class
+              </button>
+            )}
+          </div>
         </div>
 
         <div style={{ display: 'flex', gap: '15px' }}>
-          {isAdmin && (
+          {isAdmin && selectedClass && (
             <button
               onClick={() => isEditing ? saveTimetable() : setIsEditing(true)}
+              disabled={loading}
               className="btn-primary"
-              style={{ background: isEditing ? 'var(--success)' : 'var(--primary)', display: 'flex', alignItems: 'center', gap: '8px' }}
+              style={{ background: isEditing ? '#22c55e' : 'var(--primary)', display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              {isEditing ? <Check size={18} /> : <Edit2 size={18} />}
+              {loading ? <Loader2 size={18} className="animate-spin" /> : (isEditing ? <Check size={18} /> : <Edit2 size={18} />)}
               {isEditing ? 'Save Changes' : 'Edit Schedule'}
             </button>
           )}
@@ -119,10 +175,31 @@ const TimeTable = () => {
         </div>
       </header>
 
+      {showAddClassModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', zIndex: 2000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div className="glass-card animate-fade-in" style={{ width: '90%', maxWidth: '400px', padding: '30px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3>Add New Class Timetable</h3>
+              <X onClick={() => setShowAddClassModal(false)} style={{ cursor: 'pointer' }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <input 
+                type="text" 
+                placeholder="e.g. IV-B.Tech-CSE-A" 
+                className="input-field"
+                value={newClassName}
+                onChange={(e) => setNewClassName(e.target.value)}
+              />
+              <button onClick={handleAddClass} className="btn-primary">Create Empty Timetable</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isEditing && (
         <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '15px', borderRadius: '12px', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '12px', color: '#d97706' }}>
           <ShieldAlert size={20} />
-          <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>Admin Mode: You are currently modifying the institutional record. Click "Save" to persist changes.</span>
+          <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>Admin Mode: You are currently modifying the institutional record. Click "Save" to persist changes to the database.</span>
         </div>
       )}
 
@@ -205,9 +282,12 @@ const TimeTable = () => {
           th { background: #f59e0b !important; -webkit-print-color-adjust: exact; }
           .timetable-page { padding: 0 !important; }
         }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
 };
 
 export default TimeTable;
+

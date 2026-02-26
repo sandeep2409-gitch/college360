@@ -1,12 +1,11 @@
-import React from 'react';
 import Sidebar from './Sidebar';
 import { useAuth } from '../context/AuthContext';
 import { useLocation } from 'react-router-dom';
+import NotificationBell from './NotificationBell';
 
 const MainLayout = ({ children }) => {
   const { user } = useAuth();
   const location = useLocation();
-
 
   const noSidebarPages = ['/login', '/register'];
   const showSidebar = !noSidebarPages.includes(location.pathname);
@@ -18,8 +17,19 @@ const MainLayout = ({ children }) => {
   return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content">
-        <div className="animate-slide-up">
+      <main className="main-content" style={{ position: 'relative' }}>
+        <div style={{ 
+          position: 'absolute', 
+          top: '20px', 
+          right: '5%', 
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '15px'
+        }}>
+          <NotificationBell />
+        </div>
+        <div className="animate-slide-up" style={{ paddingTop: '20px' }}>
           {children}
         </div>
       </main>

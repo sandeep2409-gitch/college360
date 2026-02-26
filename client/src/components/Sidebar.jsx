@@ -14,7 +14,8 @@ import {
   Home,
   Sun,
   Moon,
-  Clock
+  Clock,
+  User
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -36,6 +37,7 @@ const Sidebar = () => {
     { path: '/resources', icon: BookOpen, label: 'Resources' },
     { path: '/feedback', icon: Star, label: 'Faculty' },
     { path: '/complaints', icon: AlertCircle, label: 'Complaints' },
+    { path: '/profile', icon: User, label: 'My Grid' },
   ];
 
   const filteredNav = navItems.filter(item => !item.adminOnly || (user?.role === 'admin'));

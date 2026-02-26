@@ -19,12 +19,12 @@ const Login = () => {
     setError('');
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5001/api/login', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login`, {
         identifier,
         password,
         role
       });
-      login(response.data.user);
+      login(response.data.user, response.data.token);
       navigate(role === 'admin' ? '/dashboard' : '/');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
