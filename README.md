@@ -9,7 +9,6 @@ College360 is a modern, full-stack ERP solution designed to automate university 
 
 
 
-URI=mongodb+srv://sandeepmanchinasetti007_db_user:d5z19UygmZTl0sXv@cluster0.ngkdk6k.mongodb.net/
 
 ## System Architecture
 
