@@ -745,12 +745,18 @@ h5 {
 /* Mobile Responsiveness for Landing Page */
 @media (max-width: 768px) {
   .hero-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
+    padding: 0 10px;
   }
 
   .hero-subtitle {
     font-size: 1rem;
     padding: 0 10px;
+  }
+
+  .hero-badge {
+    padding: 6px 14px;
+    font-size: 0.7rem;
   }
 
   .hero-ctas {
@@ -771,14 +777,51 @@ h5 {
 
   .modules-grid {
     grid-template-columns: 1fr;
+    padding: 0 10px;
+  }
+
+  .module-card {
+    padding: 20px;
+  }
+
+  .module-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .hero-section {
     margin-bottom: 50px;
+    overflow-x: hidden;
   }
 
   .landing-container {
-    padding: 0 16px;
+    padding: 0 10px;
+    overflow-x: hidden;
+  }
+
+  /* Chat window mobile sizing */
+  .chatbot-root {
+    bottom: 16px !important;
+    right: 16px !important;
+  }
+
+  .chatbot-window {
+    width: calc(100vw - 32px) !important;
+    height: 80vh !important;
+    max-height: 600px;
+  }
+
+  .chatbot-toggle {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .notification-wrapper {
+    position: fixed !important;
+    top: 16px !important;
+    right: 16px !important;
+    z-index: 2001 !important;
   }
 }
 
@@ -788,7 +831,8 @@ h5 {
   position: fixed;
   top: 16px;
   left: 16px;
-  z-index: 1000;
+  z-index: 2001;
+  /* Above sidebar */
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -809,7 +853,7 @@ h5 {
   height: 100vh;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
-  z-index: 90;
+  z-index: 1099;
 }
 
 @media (max-width: 768px) {
@@ -824,6 +868,7 @@ h5 {
   .sidebar {
     transform: translateX(-100%);
     width: 280px !important;
+    z-index: 2000;
   }
 
   .sidebar.mobile-open {

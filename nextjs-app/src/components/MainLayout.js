@@ -19,7 +19,7 @@ const MainLayout = ({ children }) => {
     <div className="app-layout">
       <Sidebar />
       <main className="main-content" style={{ position: 'relative' }}>
-        <div style={{
+        <div className="notification-wrapper" style={{
           position: 'absolute',
           top: '20px',
           right: '5%',

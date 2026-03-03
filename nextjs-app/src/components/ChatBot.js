@@ -99,7 +99,7 @@ const ChatBot = () => {
   );
 
   return (
-    <div style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 1001 }}>
+    <div className="chatbot-root" style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 1001 }}>
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -107,6 +107,7 @@ const ChatBot = () => {
             animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.8, y: 20, filter: 'blur(10px)' }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+            className="chatbot-window"
             style={{ marginBottom: '24px', width: '420px', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(30px)', borderRadius: '32px', boxShadow: '0 32px 80px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '650px' }}
           >
             <div style={{ padding: '24px', background: 'linear-gradient(135deg, #6366f1, #4f46e5, #8b5cf6)', position: 'relative' }}>
@@ -218,6 +219,7 @@ const ChatBot = () => {
         whileHover={{ scale: 1.05, y: -4 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
+        className="chatbot-toggle"
         style={{
           width: '72px', height: '72px', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: '0 20px 40px rgba(0,0,0,0.4)', position: 'relative', overflow: 'hidden', border: 'none', cursor: 'pointer',
