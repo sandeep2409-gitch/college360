@@ -28,7 +28,7 @@ export default function LandingPage() {
   return (
     <div className="landing-container">
       <div className="hero-section">
-        <div style={{ position: 'absolute', top: '-50px', left: '50%', transform: 'translateX(-50%)', width: '600px', height: '600px', background: 'radial-gradient(circle, var(--primary-glow) 0%, transparent 70%)', pointerEvents: 'none', opacity: 0.3 }} />
+        <div style={{ position: 'absolute', top: '-50px', left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '600px', height: '600px', background: 'radial-gradient(circle, var(--primary-glow) 0%, transparent 70%)', pointerEvents: 'none', opacity: 0.3 }} />
 
         <div className="hero-badge">
           <Zap size={14} /> Campus Management Automated & Intelligent
