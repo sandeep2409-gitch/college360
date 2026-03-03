@@ -26,32 +26,32 @@ export default function LandingPage() {
   ];
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-      <div style={{ textAlign: 'center', marginBottom: '80px', position: 'relative' }}>
+    <div className="landing-container">
+      <div className="hero-section">
         <div style={{ position: 'absolute', top: '-50px', left: '50%', transform: 'translateX(-50%)', width: '600px', height: '600px', background: 'radial-gradient(circle, var(--primary-glow) 0%, transparent 70%)', pointerEvents: 'none', opacity: 0.3 }} />
 
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--card-inner)', border: '1px solid var(--border)', borderRadius: '100px', padding: '8px 20px', marginBottom: '24px', fontSize: '0.8rem', fontWeight: '700', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+        <div className="hero-badge">
           <Zap size={14} /> Campus Management Automated & Intelligent
         </div>
 
-        <h1 className="page-title" style={{ fontSize: '4rem', marginBottom: '15px', maxWidth: '800px', margin: '0 auto 15px' }}>
+        <h1 className="page-title hero-title">
           College 360 Platform
         </h1>
-        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto 40px', lineHeight: 1.8 }}>
+        <p className="hero-subtitle">
           Next-generation campus intelligence. Every module connected. Every action secured. Welcome to the future of education management.
         </p>
 
-        <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+        <div className="hero-ctas">
           {user ? (
-            <Link href="/dashboard" className="btn-primary" style={{ padding: '16px 32px', fontSize: '1rem', textDecoration: 'none' }}>
+            <Link href="/dashboard" className="btn-primary">
               <Layout size={20} /> Enter Dashboard <ArrowRight size={18} />
             </Link>
           ) : (
             <>
-              <Link href="/login" className="btn-primary" style={{ padding: '16px 32px', fontSize: '1rem', textDecoration: 'none' }}>
+              <Link href="/login" className="btn-primary">
                 Access Portal <ArrowRight size={18} />
               </Link>
-              <Link href="/register" style={{ padding: '16px 32px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-main)', fontWeight: '600', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <Link href="/register" className="btn-secondary">
                 Create Account
               </Link>
             </>
@@ -59,15 +59,15 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '60px', marginBottom: '80px' }}>
+      <div className="feature-badges">
         {[
           { icon: Shield, label: 'Secure', sublabel: 'JWT Protected' },
           { icon: Cpu, label: 'AI Powered', sublabel: 'Gemini Core' },
           { icon: Globe, label: 'Real-Time', sublabel: 'Live Sync' },
           { icon: Eye, label: 'Monitored', sublabel: 'Full Audit' },
         ].map((item, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ padding: '10px', background: 'var(--card-inner)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+          <div key={i} className="feature-badge">
+            <div className="feature-icon">
               <item.icon size={20} color="var(--primary)" />
             </div>
             <div>
@@ -78,21 +78,21 @@ export default function LandingPage() {
         ))}
       </div>
 
-      <div style={{ marginBottom: '60px' }}>
-        <h2 style={{ fontSize: '1.8rem', marginBottom: '30px' }}>System Modules</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '24px' }}>
+      <div className="modules-section">
+        <h2 className="section-title">System Modules</h2>
+        <div className="modules-grid">
           {modules.map((mod, i) => (
-            <Link key={i} href={mod.path} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div className="glass-card module-card" style={{ padding: '32px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: mod.gradient, borderRadius: '50%', opacity: 0.1 }} />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
-                  <div style={{ background: mod.gradient, padding: '14px', borderRadius: '16px', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Link key={i} href={mod.path} className="module-link">
+              <div className="glass-card module-card">
+                <div className="module-glow" style={{ background: mod.gradient }} />
+                <div className="module-header">
+                  <div className="module-icon-wrapper" style={{ background: mod.gradient }}>
                     <mod.icon size={24} />
                   </div>
-                  <h3 style={{ fontSize: '1.2rem' }}>{mod.title}</h3>
+                  <h3 className="module-title">{mod.title}</h3>
                 </div>
-                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '20px' }}>{mod.desc}</p>
-                <div className="module-arrow" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary)', fontWeight: '700', fontSize: '0.85rem', opacity: 0, transform: 'translateX(-10px)', transition: 'all 0.3s ease' }}>
+                <p className="module-desc">{mod.desc}</p>
+                <div className="module-arrow">
                   Launch Module <ChevronRight size={16} />
                 </div>
               </div>
@@ -102,21 +102,21 @@ export default function LandingPage() {
       </div>
 
       {isAdmin && (
-        <div style={{ marginBottom: '60px' }}>
-          <h2 style={{ fontSize: '1.8rem', marginBottom: '30px' }}>Admin Control Center</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '24px' }}>
+        <div className="modules-section admin-section">
+          <h2 className="section-title">Admin Control Center</h2>
+          <div className="modules-grid">
             {adminModules.map((mod, i) => (
-              <Link key={i} href={mod.path} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="glass-card module-card" style={{ padding: '32px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: mod.gradient, borderRadius: '50%', opacity: 0.1 }} />
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
-                    <div style={{ background: mod.gradient, padding: '14px', borderRadius: '16px', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Link key={i} href={mod.path} className="module-link">
+                <div className="glass-card module-card">
+                  <div className="module-glow" style={{ background: mod.gradient }} />
+                  <div className="module-header">
+                    <div className="module-icon-wrapper" style={{ background: mod.gradient }}>
                       <mod.icon size={24} />
                     </div>
-                    <h3 style={{ fontSize: '1.2rem' }}>{mod.title}</h3>
+                    <h3 className="module-title">{mod.title}</h3>
                   </div>
-                  <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '20px' }}>{mod.desc}</p>
-                  <div className="module-arrow" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary)', fontWeight: '700', fontSize: '0.85rem', opacity: 0, transform: 'translateX(-10px)', transition: 'all 0.3s ease' }}>
+                  <p className="module-desc">{mod.desc}</p>
+                  <div className="module-arrow">
                     Access Panel <ChevronRight size={16} />
                   </div>
                 </div>
