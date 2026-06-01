@@ -137,8 +137,8 @@ export default function TimeTablePage() {
       </header>
 
       {showAddClassModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', zIndex: 2000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div className="glass-card animate-fade-in" style={{ width: '90%', maxWidth: '400px', padding: '30px' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0, 0, 0, 0.45)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', zIndex: 2000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div className="glass-card animate-fade-in" style={{ width: '90%', maxWidth: '400px', padding: '30px', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h3>Add New Class Timetable</h3>
               <X onClick={() => setShowAddClassModal(false)} style={{ cursor: 'pointer' }} />
@@ -158,15 +158,15 @@ export default function TimeTablePage() {
         </div>
       )}
 
-      <div style={{ overflowX: 'auto', borderRadius: '16px', border: '1px solid #e2e8f0', background: 'white', boxShadow: 'var(--shadow-lg)' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+      <div style={{ overflowX: 'auto', borderRadius: '24px', border: '1px solid var(--border)', background: 'var(--bg-surface)', backdropFilter: 'var(--card-blur)', boxShadow: 'var(--shadow-xl)', padding: '10px' }}>
+        <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '8px', minWidth: '1000px' }}>
           <thead>
             <tr>
-              <th style={{ background: '#f97316', color: 'white', padding: '20px', border: '1px solid rgba(0,0,0,0.1)', width: '120px' }}>Day</th>
+              <th style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', color: 'var(--text-main)', padding: '18px', border: '1px solid var(--border)', borderRadius: '16px', width: '130px', fontSize: '0.9rem', fontWeight: '800' }}>Day</th>
               {periods.map(p => (
-                <th key={p.id} style={{ background: '#f97316', color: 'white', padding: '15px', border: '1px solid rgba(0,0,0,0.1)' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: '800' }}>{p.label}</div>
-                  <div style={{ fontSize: '0.7rem', fontWeight: '600', opacity: 0.9 }}>{p.time}</div>
+                <th key={p.id} style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%)', color: 'var(--text-main)', padding: '14px', border: '1px solid var(--border)', borderRadius: '16px' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)' }}>{p.label}</div>
+                  <div style={{ fontSize: '0.7rem', fontWeight: '600', opacity: 0.6, marginTop: '4px', color: 'var(--text-dim)' }}>{p.time}</div>
                 </th>
               ))}
             </tr>
@@ -174,23 +174,23 @@ export default function TimeTablePage() {
           <tbody>
             {Object.keys(schedule).map(day => (
               <tr key={day}>
-                <td style={{ background: '#f97316', color: 'white', padding: '20px', fontWeight: '800', border: '1px solid rgba(0,0,0,0.1)', textAlign: 'center' }}>
+                <td style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%)', color: 'var(--text-main)', padding: '20px', fontWeight: '900', border: '1px solid var(--border)', borderRadius: '16px', textAlign: 'center', verticalAlign: 'middle', fontSize: '0.95rem', letterSpacing: '0.02em' }}>
                   {day}
                 </td>
                 {schedule[day].map((cell, idx) => (
-                  <td key={idx} style={{ padding: '12px', border: '1px solid #e2e8f0', verticalAlign: 'top', minHeight: '120px', background: cell.subject ? 'transparent' : '#f8fafc' }}>
+                  <td key={idx} className="timetable-cell" style={{ padding: '16px', border: '1px solid var(--border)', borderRadius: '16px', verticalAlign: 'top', minHeight: '120px', background: cell.subject ? 'var(--card-inner)' : 'rgba(255, 255, 255, 0.01)', transition: 'var(--transition)' }}>
                     {isEditing ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <textarea value={cell.subject} onChange={(e) => handleCellChange(day, idx, 'subject', e.target.value)} placeholder="Subject" style={{ width: '100%', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '4px', fontSize: '0.75rem', height: '40px', color: '#1e293b' }} />
-                        <textarea value={cell.teacher} onChange={(e) => handleCellChange(day, idx, 'teacher', e.target.value)} placeholder="Teacher" style={{ width: '100%', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '4px', fontSize: '0.7rem', fontStyle: 'italic', color: '#1e293b' }} />
+                        <textarea value={cell.subject} onChange={(e) => handleCellChange(day, idx, 'subject', e.target.value)} placeholder="Subject" style={{ width: '100%', border: '1px solid var(--border)', borderRadius: '8px', padding: '8px', fontSize: '0.8rem', height: '45px', color: 'var(--text-main)', background: 'var(--bg-card)', outline: 'none', resize: 'none' }} />
+                        <textarea value={cell.teacher} onChange={(e) => handleCellChange(day, idx, 'teacher', e.target.value)} placeholder="Teacher" style={{ width: '100%', border: '1px solid var(--border)', borderRadius: '8px', padding: '8px', fontSize: '0.75rem', fontStyle: 'italic', color: 'var(--text-dim)', background: 'var(--bg-card)', outline: 'none', resize: 'none', height: '35px' }} />
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
-                        <div style={{ fontWeight: '800', color: '#1e293b', fontSize: '0.85rem', marginBottom: '12px', lineHeight: 1.3 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between', minHeight: '80px' }}>
+                        <div style={{ fontWeight: '800', color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '16px', lineHeight: 1.4 }}>
                           {cell.subject || '-'}
                         </div>
                         {cell.teacher && (
-                          <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', paddingTop: '8px', borderTop: '1px solid #f1f5f9', marginTop: 'auto' }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', paddingTop: '8px', borderTop: '1px solid var(--border)', marginTop: 'auto' }}>
                             {cell.teacher}
                           </div>
                         )}
@@ -203,6 +203,7 @@ export default function TimeTablePage() {
           </tbody>
         </table>
       </div>
+
     </div>
   );
 }

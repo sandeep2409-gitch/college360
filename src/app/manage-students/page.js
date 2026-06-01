@@ -126,9 +126,9 @@ export default function ManageStudentsPage() {
         </div>
       )}
 
-      {showAddModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
-          <div className="glass-card animate-fade-in" style={{ width: '100%', maxWidth: '450px', padding: '32px' }}>
+       {showAddModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0, 0, 0, 0.45)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+          <div className="glass-card animate-fade-in" style={{ width: '100%', maxWidth: '450px', padding: '32px', border: '1px solid var(--border)' }}>
             {successData ? (
               <div style={{ textAlign: 'center' }}>
                 <div style={{ background: 'var(--success)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>

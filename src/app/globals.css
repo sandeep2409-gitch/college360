@@ -2,9 +2,9 @@
 
 :root {
   --primary: #6366f1;
-  --primary-glow: rgba(99, 102, 241, 0.5);
-  --bg-main: #0a0a0c;
-  --bg-surface: #141416;
+  --primary-glow: rgba(99, 102, 241, 0.3);
+  --bg-main: #060608;
+  --bg-surface: rgba(20, 20, 25, 0.65);
   --bg-card: rgba(255, 255, 255, 0.03);
   --sidebar-width: 280px;
   --sidebar-collapsed: 80px;
@@ -14,42 +14,42 @@
   --border: rgba(255, 255, 255, 0.08);
   --border-light: rgba(255, 255, 255, 0.04);
   --success: #10b981;
-  --success-glow: rgba(16, 185, 129, 0.4);
+  --success-glow: rgba(16, 185, 129, 0.2);
   --warning: #f59e0b;
-  --warning-glow: rgba(245, 158, 11, 0.4);
+  --warning-glow: rgba(245, 158, 11, 0.2);
   --danger: #ef4444;
-  --danger-glow: rgba(239, 68, 68, 0.4);
+  --danger-glow: rgba(239, 68, 68, 0.2);
   --error: var(--danger);
   --glass-border: var(--border);
-  --card-inner: rgba(255, 255, 255, 0.03);
-  --card-glow: rgba(99, 102, 241, 0.1);
+  --card-inner: rgba(255, 255, 255, 0.02);
+  --card-glow: rgba(99, 102, 241, 0.05);
   --font-heading: "Outfit", sans-serif;
   --font-body: "Inter", sans-serif;
   --shadow-lg:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --card-blur: blur(0px);
+  --card-blur: blur(20px);
 }
 
 [data-theme="light"] {
   --bg-main: #f0f2f5;
-  --bg-surface: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-surface: rgba(255, 255, 255, 0.65);
+  --bg-card: rgba(0, 0, 0, 0.02);
   --text-main: #0f172a;
   --text-dim: #475569;
   --text-muted: #64748b;
-  --border: rgba(0, 0, 0, 0.05);
+  --border: rgba(0, 0, 0, 0.06);
   --border-light: rgba(0, 0, 0, 0.02);
-  --glass-border: rgba(0, 0, 0, 0.05);
+  --glass-border: rgba(0, 0, 0, 0.06);
   --error: var(--danger);
   --shadow-lg:
     0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03),
     0 0 0 1px rgba(0, 0, 0, 0.02);
-  --primary-glow: rgba(99, 102, 241, 0.15);
-  --card-blur: blur(12px);
-  --card-inner: rgba(0, 0, 0, 0.02);
-  --card-glow: rgba(99, 102, 241, 0.05);
+  --primary-glow: rgba(99, 102, 241, 0.12);
+  --card-blur: blur(20px);
+  --card-inner: rgba(0, 0, 0, 0.01);
+  --card-glow: rgba(99, 102, 241, 0.03);
 }
 
 * {
@@ -65,11 +65,50 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: -15%;
+  left: -15%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+  animation: floatOrb1 25s infinite alternate ease-in-out;
+  border-radius: 50%;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  bottom: -15%;
+  right: -15%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+  animation: floatOrb2 30s infinite alternate ease-in-out;
+  border-radius: 50%;
+}
+
+@keyframes floatOrb1 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(10vw, 8vh) scale(1.15); }
+}
+
+@keyframes floatOrb2 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-8vw, -12vh) scale(1.2); }
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -95,6 +134,7 @@ h5 {
   letter-spacing: -0.025em;
   line-height: 1.2;
 }
+
 
 .glass-card {
   background: var(--bg-surface);
@@ -884,4 +924,20 @@ h5 {
   .desktop-collapse-btn {
     display: none !important;
   }
+}
+
+/* Premium Timetable Cell Hover Styles */
+.timetable-cell {
+  transition: var(--transition);
+}
+
+.timetable-cell:hover {
+  background: rgba(99, 102, 241, 0.08) !important;
+  border-color: var(--primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15) !important;
+}
+
+[data-theme="light"] .timetable-cell:hover {
+  background: rgba(99, 102, 241, 0.05) !important;
 }
