@@ -1,28 +1,28 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap");
 
 :root {
-  --primary: #6366f1;
-  --primary-glow: rgba(99, 102, 241, 0.3);
-  --bg-main: #060608;
-  --bg-surface: rgba(20, 20, 25, 0.65);
-  --bg-card: rgba(255, 255, 255, 0.03);
+  --primary: #4a7c59; /* Woodland Sage Green */
+  --primary-glow: rgba(74, 124, 89, 0.25);
+  --bg-main: #0c0f0d; /* Deep Forest Charcoal */
+  --bg-surface: rgba(22, 28, 24, 0.65); /* Translucent Wood-Smoke Glass */
+  --bg-card: rgba(255, 255, 255, 0.02);
   --sidebar-width: 280px;
   --sidebar-collapsed: 80px;
-  --text-main: #f8fafc;
-  --text-dim: #94a3b8;
-  --text-muted: #64748b;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-light: rgba(255, 255, 255, 0.04);
-  --success: #10b981;
-  --success-glow: rgba(16, 185, 129, 0.2);
-  --warning: #f59e0b;
-  --warning-glow: rgba(245, 158, 11, 0.2);
-  --danger: #ef4444;
-  --danger-glow: rgba(239, 68, 68, 0.2);
+  --text-main: #f2f5f3; /* Linen White */
+  --text-dim: #a2b5a6; /* Eucalyptus Mist */
+  --text-muted: #6e8574; /* Lichen Bark */
+  --border: rgba(255, 255, 255, 0.07);
+  --border-light: rgba(255, 255, 255, 0.03);
+  --success: #606c38; /* Forest Moss Green */
+  --success-glow: rgba(96, 108, 56, 0.2);
+  --warning: #dda15e; /* Sand Ochre Amber */
+  --warning-glow: rgba(221, 161, 94, 0.2);
+  --danger: #b05b4c; /* Earthy Terracotta Clay */
+  --danger-glow: rgba(176, 91, 76, 0.2);
   --error: var(--danger);
   --glass-border: var(--border);
-  --card-inner: rgba(255, 255, 255, 0.02);
-  --card-glow: rgba(99, 102, 241, 0.05);
+  --card-inner: rgba(255, 255, 255, 0.015);
+  --card-glow: rgba(74, 124, 89, 0.04);
   --font-heading: "Outfit", sans-serif;
   --font-body: "Inter", sans-serif;
   --shadow-lg:
@@ -33,23 +33,23 @@
 }
 
 [data-theme="light"] {
-  --bg-main: #f0f2f5;
+  --bg-main: #f5f6f2; /* Warm Sand Linen */
   --bg-surface: rgba(255, 255, 255, 0.65);
   --bg-card: rgba(0, 0, 0, 0.02);
-  --text-main: #0f172a;
-  --text-dim: #475569;
-  --text-muted: #64748b;
-  --border: rgba(0, 0, 0, 0.06);
-  --border-light: rgba(0, 0, 0, 0.02);
-  --glass-border: rgba(0, 0, 0, 0.06);
+  --text-main: #1e2621; /* Deep Bark Charcoal */
+  --text-dim: #4e5c53; /* Mossy Stone Slate */
+  --text-muted: #7c8e82; /* Lichen Bark */
+  --border: rgba(30, 38, 33, 0.08);
+  --border-light: rgba(30, 38, 33, 0.03);
+  --glass-border: rgba(30, 38, 33, 0.08);
   --error: var(--danger);
   --shadow-lg:
     0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03),
     0 0 0 1px rgba(0, 0, 0, 0.02);
-  --primary-glow: rgba(99, 102, 241, 0.12);
+  --primary-glow: rgba(74, 124, 89, 0.15);
   --card-blur: blur(20px);
-  --card-inner: rgba(0, 0, 0, 0.01);
-  --card-glow: rgba(99, 102, 241, 0.03);
+  --card-inner: rgba(0, 0, 0, 0.015);
+  --card-glow: rgba(74, 124, 89, 0.03);
 }
 
 * {
@@ -75,7 +75,7 @@ body::before {
   left: -15%;
   width: 60vw;
   height: 60vw;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(74, 124, 89, 0.12) 0%, transparent 70%);
   z-index: -1;
   pointer-events: none;
   animation: floatOrb1 25s infinite alternate ease-in-out;
@@ -89,7 +89,7 @@ body::after {
   right: -15%;
   width: 60vw;
   height: 60vw;
-  background: radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(221, 161, 94, 0.07) 0%, transparent 70%);
   z-index: -1;
   pointer-events: none;
   animation: floatOrb2 30s infinite alternate ease-in-out;
@@ -105,6 +105,7 @@ body::after {
   0% { transform: translate(0, 0) scale(1); }
   100% { transform: translate(-8vw, -12vh) scale(1.2); }
 }
+
 
 ::-webkit-scrollbar {
   width: 8px;

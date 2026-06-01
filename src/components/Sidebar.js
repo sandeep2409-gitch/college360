@@ -106,7 +106,7 @@ const Sidebar = () => {
               href="/login"
               onClick={closeMobileMenu}
               className="nav-item"
-              style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', width: '100%' }}
+              style={{ background: 'var(--primary-glow)', color: 'var(--primary)', width: '100%' }}
             >
               <Users size={20} />
               {!isCollapsed && <span>Sign In</span>}

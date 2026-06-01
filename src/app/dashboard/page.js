@@ -48,10 +48,10 @@ export default function DashboardPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '40px' }}>
           {[
-            { icon: Users, label: 'Total Students', value: stats.totalStudents, color: '#6366f1', gradient: 'linear-gradient(135deg, #6366f1, #8b5cf6)' },
-            { icon: QrCode, label: 'Present Today', value: `${stats.presentToday}%`, color: '#10b981', gradient: 'linear-gradient(135deg, #10b981, #34d399)' },
-            { icon: BookOpen, label: 'Resources', value: stats.totalResources, color: '#f59e0b', gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)' },
-            { icon: AlertCircle, label: 'Pending Issues', value: stats.pendingComplaints, color: '#ef4444', gradient: 'linear-gradient(135deg, #ef4444, #f87171)' },
+            { icon: Users, label: 'Total Students', value: stats.totalStudents, color: '#31572c', gradient: 'linear-gradient(135deg, #31572c, #4f772d)' },
+            { icon: QrCode, label: 'Present Today', value: `${stats.presentToday}%`, color: '#4a7c59', gradient: 'linear-gradient(135deg, #4a7c59, #689f7d)' },
+            { icon: BookOpen, label: 'Resources', value: stats.totalResources, color: '#dda15e', gradient: 'linear-gradient(135deg, #dda15e, #e9c46a)' },
+            { icon: AlertCircle, label: 'Pending Issues', value: stats.pendingComplaints, color: '#b05b4c', gradient: 'linear-gradient(135deg, #b05b4c, #c87a6b)' },
           ].map((stat, i) => (
             <div key={i} className="glass-card" style={{ padding: '28px', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: '-15px', right: '-15px', width: '80px', height: '80px', background: stat.gradient, borderRadius: '50%', opacity: 0.1 }} />
@@ -83,7 +83,7 @@ export default function DashboardPage() {
                 <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} />
                 <YAxis stroke="var(--text-muted)" fontSize={12} />
                 <Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-main)' }} />
-                <Line type="monotone" dataKey="attendance" stroke="#6366f1" strokeWidth={3} dot={{ fill: '#6366f1', strokeWidth: 2 }} />
+                <Line type="monotone" dataKey="attendance" stroke="#4a7c59" strokeWidth={3} dot={{ fill: '#4a7c59', strokeWidth: 2 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -105,9 +105,9 @@ export default function DashboardPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '40px' }}>
         {[
-          { icon: Calendar, label: 'Days Present', value: attendanceRecords.length, color: '#10b981' },
-          { icon: BarChart2, label: 'Attendance %', value: `${attendancePercentage}%`, color: '#6366f1' },
-          { icon: Clock, label: 'This Month', value: attendanceRecords.filter(r => r.date?.startsWith(new Date().toISOString().slice(0, 7))).length, color: '#f59e0b' },
+          { icon: Calendar, label: 'Days Present', value: attendanceRecords.length, color: '#4a7c59' },
+          { icon: BarChart2, label: 'Attendance %', value: `${attendancePercentage}%`, color: '#31572c' },
+          { icon: Clock, label: 'This Month', value: attendanceRecords.filter(r => r.date?.startsWith(new Date().toISOString().slice(0, 7))).length, color: '#dda15e' },
         ].map((stat, i) => (
           <div key={i} className="glass-card" style={{ padding: '28px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>

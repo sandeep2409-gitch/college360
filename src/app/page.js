@@ -12,17 +12,17 @@ export default function LandingPage() {
   const isAdmin = user?.role === 'admin';
 
   const modules = [
-    { icon: QrCode, title: 'Smart Attendance', desc: 'Multi-factor verification with QR scanning, geolocation, and facial recognition.', path: '/attendance', color: '#6366f1', gradient: 'linear-gradient(135deg, #6366f1, #8b5cf6)' },
-    { icon: BookOpen, title: 'Resource Nexus', desc: 'Upload, share, and discover academic materials with admin approval workflows.', path: '/resources', color: '#10b981', gradient: 'linear-gradient(135deg, #10b981, #34d399)' },
-    { icon: Star, title: 'Faculty Intel', desc: 'Anonymous faculty feedback system with real-time analytics and insights.', path: '/feedback', color: '#f59e0b', gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)' },
-    { icon: AlertCircle, title: 'Grievance Portal', desc: 'Secure anonymous complaint system with tracking and resolution pipeline.', path: '/complaints', color: '#ef4444', gradient: 'linear-gradient(135deg, #ef4444, #f87171)' },
-    { icon: Calendar, title: 'Event Calendar', desc: 'Comprehensive academic, cultural, and campus event management system.', path: '/calendar', color: '#ec4899', gradient: 'linear-gradient(135deg, #ec4899, #f472b6)' },
-    { icon: Clock, title: 'Time Table', desc: 'View and manage institutional class schedules and period timings.', path: '/timetable', color: '#f97316', gradient: 'linear-gradient(135deg, #f97316, #fb923c)' },
+    { icon: QrCode, title: 'Smart Attendance', desc: 'Multi-factor verification with QR scanning, geolocation, and facial recognition.', path: '/attendance', color: '#4a7c59', gradient: 'linear-gradient(135deg, #4a7c59, #689f7d)' },
+    { icon: BookOpen, title: 'Resource Nexus', desc: 'Upload, share, and discover academic materials with admin approval workflows.', path: '/resources', color: '#606c38', gradient: 'linear-gradient(135deg, #606c38, #8f9779)' },
+    { icon: Star, title: 'Faculty Intel', desc: 'Anonymous faculty feedback system with real-time analytics and insights.', path: '/feedback', color: '#dda15e', gradient: 'linear-gradient(135deg, #dda15e, #e9c46a)' },
+    { icon: AlertCircle, title: 'Grievance Portal', desc: 'Secure anonymous complaint system with tracking and resolution pipeline.', path: '/complaints', color: '#b05b4c', gradient: 'linear-gradient(135deg, #b05b4c, #c87a6b)' },
+    { icon: Calendar, title: 'Event Calendar', desc: 'Comprehensive academic, cultural, and campus event management system.', path: '/calendar', color: '#9a5a3a', gradient: 'linear-gradient(135deg, #9a5a3a, #b07d62)' },
+    { icon: Clock, title: 'Time Table', desc: 'View and manage institutional class schedules and period timings.', path: '/timetable', color: '#bc6c25', gradient: 'linear-gradient(135deg, #bc6c25, #dda15e)' },
   ];
 
   const adminModules = [
-    { icon: Users, title: 'Student Registry', desc: 'Complete student management with provisioning and access control.', path: '/manage-students', color: '#8b5cf6', gradient: 'linear-gradient(135deg, #8b5cf6, #a78bfa)' },
-    { icon: BarChart2, title: 'Analytics Matrix', desc: 'Real-time campus analytics, attendance trends, and performance metrics.', path: '/dashboard', color: '#06b6d4', gradient: 'linear-gradient(135deg, #06b6d4, #22d3ee)' },
+    { icon: Users, title: 'Student Registry', desc: 'Complete student management with provisioning and access control.', path: '/manage-students', color: '#31572c', gradient: 'linear-gradient(135deg, #31572c, #4f772d)' },
+    { icon: BarChart2, title: 'Analytics Matrix', desc: 'Real-time campus analytics, attendance trends, and performance metrics.', path: '/dashboard', color: '#2b5c5f', gradient: 'linear-gradient(135deg, #2b5c5f, #4a8285)' },
   ];
 
   return (
